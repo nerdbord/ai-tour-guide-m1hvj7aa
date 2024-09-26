@@ -1,23 +1,36 @@
-# AI Tour Guide
+This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
-## Project Brief
+## Getting Started
 
-Welcome to the AI Tour Guide Hackathon!
+First, run the development server:
 
-Your goal is to create an AI-powered tour guide that offers hyperpersonalized tours based on user preferences. Users can set up a new tour, choose the language of the lector, and then start their personalized tour. As they walk through cities, the AI tour guide will provide interesting information through their headphones.
+```bash
+npm run dev
+# or
+yarn dev
+# or
+pnpm dev
+# or
+bun dev
+```
 
-In this project, you will integrate Google Maps API, Eleven Labs, and OpenAI to deliver a seamless and engaging tour experience. This project will help you develop skills in API integration, natural language processing, and real-time data handling.
+Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
 
-Remember, a repository will be generated for this project, and you will find all the necessary files to get started.
+You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-## Tasks
+This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
-1. **Set Up Project Repository**: Ensure that all necessary files and dependencies are included.
-2. **Conduct Initial Brainstorming**: Identify the key components and features of the AI tour guide. Document your findings and create a project plan.
-3. **Create UI and Branding**: Develop a dedicated UI for the app.
-4. **Design Landing Page**: Create a landing page with email gathering and product demo features.
-5. **Integrate Google Maps API**: Track the user's location and provide relevant tour information.
-6. **Integrate Eleven Labs**: Generate audio content for the tour guide based on user preferences.
-7. **Integrate OpenAI**: Generate personalized tour content based on user preferences and location data.
-8. **Test the AI Tour Guide**: Ensure all functionalities work as expected. Document any issues and fix them.
-9. **Deploy the Project**: Deploy the AI tour guide project to a live environment.
+## Learn More
+
+To learn more about Next.js, take a look at the following resources:
+
+- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
+- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+
+You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+
+## Deploy on Vercel
+
+The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+
+Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
