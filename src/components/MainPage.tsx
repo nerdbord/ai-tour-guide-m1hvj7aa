@@ -2,17 +2,18 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import React from "react";
 import { Button } from "./ui/Button";
+import { SelectMaterials } from "./SelectMaterials";
 
 type Props = {};
 
 export const MainPage = (props: Props) => {
   return (
-    <div>
-      <div>
+    <>
+      <div className="w-full">
         <Button color="white">Moje historie</Button>
       </div>
 
-      <h1 className="text-3xl not-italic font-bold mt-[78px]">
+      <h1 className="text-3xl not-italic font-bold mt-20">
         Czego chcesz się nauczyć?
       </h1>
       <p className="text-lg not-italic font-medium leading-6 mt-[26px]">
@@ -24,6 +25,7 @@ export const MainPage = (props: Props) => {
         </p>
         <Button color="black">Wrzuć zdjęcia</Button>
       </div>
-    </div>
+      <SelectMaterials />
+    </>
   );
 };

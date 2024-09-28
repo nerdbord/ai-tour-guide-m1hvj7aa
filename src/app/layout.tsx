@@ -24,9 +24,9 @@ export default function RootLayout({
         className={`${inter.className} flex justify-center items-start h-full overflow-hidden`}
       >
         <div
-          className="flex flex-col justify-between bg-gray-900 
+          className="flex flex-col justify-between bg-gray-600 
              h-full w-full 
-             md:h-[652px] md:w-[393px] md:max-h-[100vh] lg:mx-auto"
+             md:h-[652px] md:w-[393px] md:max-h-[100vh] lg:mx-auto relative"
         >
           {children}
         </div>
