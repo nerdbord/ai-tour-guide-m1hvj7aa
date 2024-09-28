@@ -8,7 +8,15 @@ interface Material {
   title: string;
 }
 
-export const SelectMaterials = () => {
+interface SelectMaterialsProps {
+  onSelectedMaterialsChange: (materials: Material[]) => void; // Prop do przekazania wybranych materiałów do MainPage
+  closeSelectMaterials: () => void; // Prop do zamknięcia SelectMaterials
+}
+
+export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
+  onSelectedMaterialsChange,
+  closeSelectMaterials,
+}) => {
   const [selectedMaterials, setSelectedMaterials] = useState<Material[]>([]);
 
   const cardsData: Material[] = [
@@ -22,26 +30,29 @@ export const SelectMaterials = () => {
     { id: 8, title: "Card 8" },
     { id: 9, title: "Card 9" },
     { id: 10, title: "Card 10" },
+    { id: 11, title: "Card 11" },
   ];
 
   const handleCardClick = (card: Material) => {
     setSelectedMaterials((prevSelected) => {
-      // Sprawdzamy, czy karta już istnieje w wybranych materiałach
       const isSelected = prevSelected.some((item) => item.id === card.id);
 
       if (isSelected) {
-        // Jeśli karta już jest wybrana, usuwamy ją
         return prevSelected.filter((material) => material.id !== card.id);
       } else {
-        // Jeśli karty nie ma w wybranych, dodajemy ją
         return [...prevSelected, card];
       }
     });
   };
 
   useEffect(() => {
-    console.log(selectedMaterials); // Tutaj zobaczysz zaktualizowaną wartość
-  }, [selectedMaterials]);
+    onSelectedMaterialsChange(selectedMaterials); // Wywołaj prop za każdym razem, gdy selectedMaterials się zmieni
+  }, [selectedMaterials, onSelectedMaterialsChange]);
+
+  const handleAddSelected = () => {
+    onSelectedMaterialsChange(selectedMaterials); // Przekazujemy wybrane materiały do rodzica
+    closeSelectMaterials(); // Zamykamy okno
+  };
 
   return (
     <div className="z-10 bg-slate-500 w-full absolute pt-6 pb-12 px-4 left-0 bottom-0 right-0">
@@ -61,7 +72,9 @@ export const SelectMaterials = () => {
       </div>
       <div className="flex gap-3 pt-4">
         <Button color="white">Zrób zdjęcie</Button>
-        <Button color="black">Dodaj wybrane</Button>
+        <Button color="black" onClick={handleAddSelected}>
+          Dodaj wybrane
+        </Button>
       </div>
     </div>
   );
