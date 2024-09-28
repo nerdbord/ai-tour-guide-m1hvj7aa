@@ -4,6 +4,8 @@
 import React, { useState } from "react";
 import { Button } from "./ui/Button";
 import { SelectMaterials } from "./SelectMaterials";
+import { HiPlus } from "react-icons/hi2";
+import { ListItem } from "./ui/ListItem";
 
 interface Material {
   id: number;
@@ -25,11 +27,14 @@ export const MainPage = (props: Props) => {
     console.log(materials);
   };
 
+  const handleRemoveMaterial = (id: number) => {
+    setSelectedMaterials((prevMaterials) =>
+      prevMaterials.filter((material) => material.id !== id)
+    );
+  };
+
   return (
-    <div className="flex flex-col space-between h-full w-full">
-      {/* <div className="w-full">
-        {selectedMaterials.length === 0 && <Button>Moje historie</Button>}
-      </div> */}
+    <div className="flex flex-col space-between items-center h-full w-full ">
       <div>
         <h1 className="text-3xl not-italic font-bold mt-20">
           Czego chcesz się nauczyć?
@@ -40,15 +45,26 @@ export const MainPage = (props: Props) => {
       </div>
 
       {selectedMaterials.length > 0 ? (
-        <div className="flex flex-col max-h-full flex-grow mt-4">
-          <div className="flex justify-between items-center">
-            Wybrane materiały ({selectedMaterials.length})
+        <div className="flex flex-col w-full flex-grow mt-4 mb-9 gap-4 overflow-hidden">
+          <div className="flex justify-between items-center mb-2">
+            <h2 className="text-xl font-bold">
+              Wybrane materiały ({selectedMaterials.length})
+            </h2>
             <div
-              className="second-bg py-1 px-3 rounded-full cursor-pointer"
+              className="second-bg py-1 px-3 rounded-full cursor-pointer flex items-center gap-2"
               onClick={handleSelectVisible}
             >
-              Dodaj więcej
+              <HiPlus className="text-white" /> <p>Dodaj więcej</p>
             </div>
+          </div>
+          <div className="overflow-y-auto max-h-96 w-full scrollbar-hide pr-4">
+            {selectedMaterials.map((material) => (
+              <ListItem
+                key={material.id}
+                title={material.title}
+                onRemove={() => handleRemoveMaterial(material.id)}
+              />
+            ))}
           </div>
         </div>
       ) : (
