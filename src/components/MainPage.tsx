@@ -56,7 +56,7 @@ export const MainPage = (props: Props) => {
       </div>
 
       {selectedMaterials.length > 0 ? (
-        <div className="flex flex-col max-h-full w-full flex-grow mt-4  mb-9 gap-4">
+        <div className="flex flex-col w-full flex-grow mt-4 mb-9 gap-4">
           <div className="flex justify-between items-center">
             Wybrane materiały ({selectedMaterials.length})
             <div
@@ -66,7 +66,7 @@ export const MainPage = (props: Props) => {
               <HiPlus className="text-white" /> <p>Dodaj więcej</p>
             </div>
           </div>
-          <div className="overflow-y-scroll max-h-96 scrollbar-hide">
+          <div className="overflow-y-scroll max-h-[300px] h-[200px] scrollbar-hide rounded-lg pt-1">
             {selectedMaterials.map((material) => (
               <ListItem
                 key={material.id}
@@ -75,6 +75,12 @@ export const MainPage = (props: Props) => {
               />
             ))}
           </div>
+          <Button
+            className="mt-4 w-auto"
+            onClick={() => setSelectVisible(false)}
+          >
+            Zaczynamy!
+          </Button>
         </div>
       ) : (
         <div className="w-full h-full border border-dashed flex flex-col items-center justify-end gap-3 mt-[74px] pt-7 pb-6 px-12 flex-grow second-bg ">
