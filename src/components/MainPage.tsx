@@ -22,9 +22,20 @@ export const MainPage = (props: Props) => {
     setSelectVisible(!selectVisible);
   };
 
-  const handleSelectedMaterials = (materials: Material[]) => {
-    setSelectedMaterials(materials);
-    console.log(materials);
+  const handleSelectedMaterials = (newMaterials: Material[]) => {
+    setSelectedMaterials((prevMaterials) => {
+      // Create a set of all current and new materials by their IDs
+      const materialSet = new Map<number, Material>();
+      prevMaterials.forEach((material) =>
+        materialSet.set(material.id, material)
+      );
+      newMaterials.forEach((material) =>
+        materialSet.set(material.id, material)
+      );
+
+      // Convert the map back to an array
+      return Array.from(materialSet.values());
+    });
   };
 
   const handleRemoveMaterial = (id: number) => {
@@ -45,11 +56,9 @@ export const MainPage = (props: Props) => {
       </div>
 
       {selectedMaterials.length > 0 ? (
-        <div className="flex flex-col w-full flex-grow mt-4 mb-9 gap-4 overflow-hidden">
-          <div className="flex justify-between items-center mb-2">
-            <h2 className="text-xl font-bold">
-              Wybrane materiały ({selectedMaterials.length})
-            </h2>
+        <div className="flex flex-col max-h-full w-full flex-grow mt-4  mb-9 gap-4">
+          <div className="flex justify-between items-center">
+            Wybrane materiały ({selectedMaterials.length})
             <div
               className="second-bg py-1 px-3 rounded-full cursor-pointer flex items-center gap-2"
               onClick={handleSelectVisible}
@@ -57,7 +66,7 @@ export const MainPage = (props: Props) => {
               <HiPlus className="text-white" /> <p>Dodaj więcej</p>
             </div>
           </div>
-          <div className="overflow-y-auto max-h-96 w-full scrollbar-hide pr-4">
+          <div className="overflow-y-scroll max-h-96 scrollbar-hide">
             {selectedMaterials.map((material) => (
               <ListItem
                 key={material.id}
@@ -68,7 +77,7 @@ export const MainPage = (props: Props) => {
           </div>
         </div>
       ) : (
-        <div className="w-full h-full border border-dashed flex flex-col items-center justify-end gap-3 mt-[74px] pt-7 pb-6 px-12 flex-grow second-bg">
+        <div className="w-full h-full border border-dashed flex flex-col items-center justify-end gap-3 mt-[74px] pt-7 pb-6 px-12 flex-grow second-bg ">
           <p className="text-center text-sm not-italic font-semibold leading-4">
             Wrzuć zdjęcia lub tekst, <br /> z których chcesz się uczyć
           </p>
@@ -82,7 +91,6 @@ export const MainPage = (props: Props) => {
           closeSelectMaterials={() => setSelectVisible(false)}
         />
       )}
-      <Button>Załaduj</Button>
     </div>
   );
 };
