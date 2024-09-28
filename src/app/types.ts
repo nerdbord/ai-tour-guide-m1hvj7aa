@@ -15,7 +15,7 @@ interface Narration {
 }
 
 // Interface for a decision step
-interface Decision {
+export interface Decision {
   type: "decision";
   question: string;
   options: DecisionOption[];
@@ -40,7 +40,7 @@ interface StoryContext {
 }
 
 // Record of a decision made by the user
-interface DecisionRecord {
+export interface DecisionRecord {
   decisionIndex: number; // Index of the decision step in the steps array
   optionIndex: number; // Index of the selected option in the options array
 }
