@@ -35,6 +35,8 @@ const story: Story = {
         "Wybierasz się do Koloseum, podziwiając monumentalne ruiny starożytnego amfiteatru.",
     },
   ],
+  pastDecisions: [],
+  context: {},
 };
 
 export default function Reading() {
