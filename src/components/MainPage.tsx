@@ -83,7 +83,6 @@ export const MainPage = (props: Props) => {
           closeSelectMaterials={() => setSelectVisible(false)}
         />
       )}
-      <Button>Załaduj</Button>
     </div>
   );
 };
