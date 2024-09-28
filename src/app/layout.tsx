@@ -31,7 +31,7 @@ export default function RootLayout({
         <div
           className="flex flex-col justify-between bg-gray-900 
                         h-screen w-screen 
-                        md:h-[652px] md:w-[393px] lg:mx-auto"
+                        sm:h-[652px] sm:w-[393px] md:mx-auto"
         >
           {children}
         </div>
