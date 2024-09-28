@@ -4,7 +4,6 @@
 import React, { useState } from "react";
 import { Button } from "./ui/Button";
 import { SelectMaterials } from "./SelectMaterials";
-import { Selected } from "./Selected"; // Import komponentu Selected
 
 interface Material {
   id: number;
@@ -27,39 +26,47 @@ export const MainPage = (props: Props) => {
   };
 
   return (
-    <>
-      <div className="w-full">
-        <Button color="white">Moje historie</Button>
+    <div className="flex flex-col space-between h-full w-full">
+      {/* <div className="w-full">
+        {selectedMaterials.length === 0 && <Button>Moje historie</Button>}
+      </div> */}
+      <div>
+        <h1 className="text-3xl not-italic font-bold mt-20">
+          Czego chcesz się nauczyć?
+        </h1>
+        <p className="text-lg not-italic font-medium leading-6 py-4">
+          Wrzuć materiał, z którego mam <br /> stworzyć historię:
+        </p>
       </div>
 
       {selectedMaterials.length > 0 ? (
-        <Selected />
-      ) : (
-        <>
-          <h1 className="text-3xl not-italic font-bold mt-20">
-            Czego chcesz się nauczyć?
-          </h1>
-          <p className="text-lg not-italic font-medium leading-6 mt-[26px]">
-            Wrzuć materiał, z którego mam <br /> stworzyć historię:
-          </p>
-          <div className="w-full h-40 border border-dashed flex flex-col items-center justify-center gap-6 mt-[26px] pt-7 pb-6 px-12">
-            <p className="text-center text-sm not-italic font-semibold leading-4">
-              Umieść obrazy materiałów, których chciałbyś się nauczyć.
-            </p>
-            <Button color="black" onClick={handleSelectVisible}>
-              Wrzuć zdjęcia
-            </Button>
+        <div className="flex flex-col max-h-full flex-grow mt-4">
+          <div className="flex justify-between items-center">
+            Wybrane materiały ({selectedMaterials.length})
+            <div
+              className="second-bg py-1 px-3 rounded-full cursor-pointer"
+              onClick={handleSelectVisible}
+            >
+              Dodaj więcej
+            </div>
           </div>
-        </>
+        </div>
+      ) : (
+        <div className="w-full h-full border border-dashed flex flex-col items-center justify-end gap-3 mt-[74px] pt-7 pb-6 px-12 flex-grow second-bg">
+          <p className="text-center text-sm not-italic font-semibold leading-4">
+            Wrzuć zdjęcia lub tekst, <br /> z których chcesz się uczyć
+          </p>
+          <Button onClick={handleSelectVisible}>Wrzuć zdjęcia</Button>
+        </div>
       )}
 
-      {/* Wyświetlanie SelectMaterials, gdy selectVisible jest true */}
       {selectVisible && (
         <SelectMaterials
           onSelectedMaterialsChange={handleSelectedMaterials}
           closeSelectMaterials={() => setSelectVisible(false)}
         />
       )}
-    </>
+      <Button>Załaduj</Button>
+    </div>
   );
 };
