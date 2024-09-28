@@ -1,6 +1,11 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
+import {
+  generateStoryStepAudioSlice,
+  generateStoryStepTextSlice,
+} from "@/app/_actions/story.actions";
 
+// Define the StoryStep types
 type StoryStep = Narration | Decision;
 
 interface Narration {
@@ -14,37 +19,32 @@ interface Decision {
   question: string;
   options: string[];
   audioUrl: string;
+  selectedOption?: string;
 }
 
-const storySteps: StoryStep[] = [
-  {
-    type: "narration",
-    content:
-      "Znajdujesz się w starożytnym Rzymie, stojąc pośrodku tętniącego życiem targu pełnego kupców i obywateli.",
-    audioUrl: "../../audio/narration1.mp3",
-  },
-  {
-    type: "narration",
-    content:
-      "Przed sobą widzisz wspaniałe Koloseum, które dominuje nad całym miastem.",
-    audioUrl: "../../audio/narration2.mp3",
-  },
-  {
-    type: "decision",
-    question: "Gdzie chciałbyś pójść najpierw?",
-    options: ["Odwiedź Koloseum", "Przejdź się po Forum Romanum"],
-    audioUrl: "../../audio/narration4.mp3",
-  },
-  {
-    type: "narration",
-    content:
-      "Wybierasz się do Koloseum, podziwiając monumentalne ruiny starożytnego amfiteatru.",
-    audioUrl: "../../audio/narration3.mp3",
-  },
-];
-
 export default function StarWarsNarrative() {
-  const [currentStep, setCurrentStep] = useState(0);
+  const [currentStep, setCurrentStep] = useState(3);
+  const [isGenerating, setIsGenerating] = useState(false);
+  const [storySteps, setStorySteps] = useState<StoryStep[]>([
+    {
+      type: "narration",
+      content:
+        "Znajdujesz się w starożytnym Rzymie, stojąc pośrodku tętniącego życiem targu pełnego kupców i obywateli.",
+      audioUrl: "../../audio/narration1.mp3",
+    },
+    {
+      type: "narration",
+      content:
+        "Przed sobą widzisz wspaniałe Koloseum, które dominuje nad całym miastem.",
+      audioUrl: "../../audio/narration2.mp3",
+    },
+    {
+      type: "decision",
+      question: "Gdzie chciałbyś pójść najpierw?",
+      options: ["Odwiedź Koloseum", "Przejdź się po Forum Romanum"],
+      audioUrl: "../../audio/narration4.mp3",
+    },
+  ]);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [started, setStarted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
@@ -55,13 +55,13 @@ export default function StarWarsNarrative() {
       storySteps[currentStep]?.type === "narration" &&
       audioRef.current
     ) {
-      audioRef.current.src = (storySteps[currentStep] as Narration).audioUrl;
+      audioRef.current.src = storySteps[currentStep].audioUrl;
       audioRef.current.play().catch((error) => {
         console.log("Audio playback failed:", error);
       });
       setIsAudioPlaying(true);
     }
-  }, [currentStep, started]);
+  }, [currentStep, started, storySteps]);
 
   const handleAudioEnd = () => {
     setIsAudioPlaying(false);
@@ -77,10 +77,68 @@ export default function StarWarsNarrative() {
     }
   };
 
-  const handleDecision = () => {
-    if (currentStep < storySteps.length - 1) {
-      setCurrentStep((prev) => prev + 1);
-      setIsAudioPlaying(true);
+  const handleDecision = async (option: string) => {
+    const stepId = `step-${Date.now()}`;
+    const storyId = "your-story-id"; // Replace with actual story ID
+    const context = storySteps
+      .filter((step): step is Narration => step.type === "narration")
+      .map((step) => step.content)
+      .join(" ");
+
+    const previousDecisions = storySteps
+      .filter((step): step is Decision => step.type === "decision")
+      .map((decision) => decision.question);
+
+    try {
+      // Generate text for the next step based on context and decision
+      const nextSteps = await generateStoryStepTextSlice({
+        context,
+        text: option,
+        storyId,
+        stepId,
+        previousDecisions,
+      });
+
+      console.log("nextSteps", nextSteps);
+
+      if (!nextSteps) {
+        throw new Error("Failed to generate text for the story step.");
+      }
+
+      // // Generate audio for the generated text
+      // const audioUrl = await generateStoryStepAudioSlice({
+      //   text: nextSteps,
+      //   storyId,
+      //   stepId,
+      // });
+      //
+      // if (!audioUrl) {
+      //   throw new Error("Failed to generate audio for the story step.");
+      // }
+
+      // Create new narration step
+      const newNarrativeStep: Narration = {
+        type: "narration",
+        content: nextSteps.narrativeStep,
+        audioUrl: "", // Ensure audioUrl is a string
+      };
+
+      const newDecisionStep: Decision = {
+        type: "decision",
+        question: nextSteps.decisionStep.text,
+        options: nextSteps.decisionStep.options,
+        audioUrl: "", // Ensure audioUrl is a string
+      };
+
+      // Update the story steps
+      setStorySteps((prevSteps) => [
+        ...prevSteps,
+        newNarrativeStep,
+        newDecisionStep,
+      ]);
+      setCurrentStep((prev) => prev + 2);
+    } catch (error) {
+      console.error("Error generating next story step:", error);
     }
   };
 
@@ -117,8 +175,9 @@ export default function StarWarsNarrative() {
                   {step.options.map((option, index) => (
                     <button
                       key={index}
+                      disabled={isGenerating}
                       className="bg-gray-700 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors"
-                      onClick={handleDecision}
+                      onClick={() => handleDecision(option)}
                     >
                       {option}
                     </button>
