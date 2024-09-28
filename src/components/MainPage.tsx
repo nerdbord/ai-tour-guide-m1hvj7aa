@@ -22,9 +22,20 @@ export const MainPage = (props: Props) => {
     setSelectVisible(!selectVisible);
   };
 
-  const handleSelectedMaterials = (materials: Material[]) => {
-    setSelectedMaterials(materials);
-    console.log(materials);
+  const handleSelectedMaterials = (newMaterials: Material[]) => {
+    setSelectedMaterials((prevMaterials) => {
+      // Create a set of all current and new materials by their IDs
+      const materialSet = new Map<number, Material>();
+      prevMaterials.forEach((material) =>
+        materialSet.set(material.id, material)
+      );
+      newMaterials.forEach((material) =>
+        materialSet.set(material.id, material)
+      );
+
+      // Convert the map back to an array
+      return Array.from(materialSet.values());
+    });
   };
 
   const handleRemoveMaterial = (id: number) => {
@@ -35,9 +46,6 @@ export const MainPage = (props: Props) => {
 
   return (
     <div className="flex flex-col space-between items-center h-full w-full ">
-      {/* <div className="w-full">
-        {selectedMaterials.length === 0 && <Button>Moje historie</Button>}
-      </div> */}
       <div>
         <h1 className="text-3xl not-italic font-bold mt-20">
           Czego chcesz się nauczyć?
