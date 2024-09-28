@@ -4,15 +4,21 @@ import React, { useState, useRef, useEffect } from "react";
 export const CapturePicture: React.FC = () => {
   const [image, setImage] = useState<string | null>(null);
   const [cameraError, setCameraError] = useState<string | null>(null);
+  const [isCameraActive, setIsCameraActive] = useState<boolean>(true);
   const videoRef = useRef<HTMLVideoElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
-    startCamera();
+    if (isCameraActive) {
+      startCamera();
+    } else {
+      stopCamera();
+    }
+
     return () => {
       stopCamera();
     };
-  }, []);
+  }, [isCameraActive]);
 
   const startCamera = () => {
     if (videoRef.current) {
@@ -43,8 +49,7 @@ export const CapturePicture: React.FC = () => {
 
   const handleCancel = () => {
     setImage(null);
-    stopCamera();
-    startCamera();
+    setIsCameraActive(true); // Re-enable the camera
   };
 
   const captureImage = () => {
@@ -61,16 +66,15 @@ export const CapturePicture: React.FC = () => {
           canvasRef.current.height
         );
         setImage(canvasRef.current.toDataURL("image/png"));
-        stopCamera(); // Stop camera after capturing image
+        setIsCameraActive(false); // Disable the camera after capturing image
       }
     }
   };
 
   return (
-    <div className="flex flex-col h-screen w-full bg-purple-50">
+    <div className="flex flex-col h-screen w-full ">
       {/* Header */}
-      <div className="bg-white h-16 w-full"></div>
-      <div className="flex gap-32 justify-between items-center bg-white h-12 w-full">
+      <div className="flex  justify-between items-center h-12 w-full">
         <div className="flex items-center">
           <p className="text-xl font-medium p-4">Capture Document</p>
         </div>
@@ -82,7 +86,7 @@ export const CapturePicture: React.FC = () => {
           <img
             src={image}
             alt="Captured"
-            className="max-h-full max-w-full p-4"
+            className="w-full h-full object-cover p-4"
           />
         ) : cameraError ? (
           <div className="p-4 max-w-full max-h-full">
@@ -92,7 +96,7 @@ export const CapturePicture: React.FC = () => {
           <>
             <video
               ref={videoRef}
-              className="w-full h-full object-cover"
+              className="w-full h-full object-cover p-4"
               autoPlay
               playsInline
               muted
@@ -103,12 +107,12 @@ export const CapturePicture: React.FC = () => {
       </div>
 
       {/* Footer */}
-      <div className="flex flex-col gap-4 justify-center items-center bg-white w-full px-4 pb-6">
+      <div className="flex flex-col gap-4 justify-center items-center  w-full px-4 pb-6">
         {image ? (
           <div className="flex items-center w-full justify-evenly pt-2 pb-10">
             <button
               onClick={handleCancel}
-              className="rounded-full flex items-center justify-center w-32 px-8 py-4 border border-purple-900 text-purple-900"
+              className="rounded-full flex items-center justify-center w-32 px-8 py-4 border"
             >
               <p className="px-2">Retake</p>
             </button>
@@ -117,7 +121,7 @@ export const CapturePicture: React.FC = () => {
           <div className="flex items-center w-full justify-evenly pt-2 pb-10">
             <button
               onClick={captureImage}
-              className="rounded-full w-32 px-8 py-4 border border-purple-900 bg-purple-900 text-white flex items-center justify-center"
+              className="rounded-full flex items-center justify-center w-32 px-8 py-4 border"
             >
               <p className="px-2">Capture</p>
             </button>
