@@ -13,6 +13,7 @@ interface Decision {
   type: "decision";
   question: string;
   options: string[];
+  audioUrl: string;
 }
 
 const storySteps: StoryStep[] = [
@@ -32,6 +33,7 @@ const storySteps: StoryStep[] = [
     type: "decision",
     question: "Gdzie chciałbyś pójść najpierw?",
     options: ["Odwiedź Koloseum", "Przejdź się po Forum Romanum"],
+    audioUrl: "../../audio/narration4.mp3",
   },
   {
     type: "narration",
@@ -50,7 +52,7 @@ export default function StarWarsNarrative() {
   useEffect(() => {
     if (
       started &&
-      storySteps[currentStep].type === "narration" &&
+      storySteps[currentStep]?.type === "narration" &&
       audioRef.current
     ) {
       audioRef.current.src = (storySteps[currentStep] as Narration).audioUrl;
@@ -63,20 +65,27 @@ export default function StarWarsNarrative() {
 
   const handleAudioEnd = () => {
     setIsAudioPlaying(false);
-    if (storySteps[currentStep + 1]?.type === "decision") {
-      // If the next step is a decision, do not automatically proceed
+    const isLastStep = currentStep === storySteps.length - 1;
+
+    if (isLastStep) {
+      setStarted(false);
       return;
     }
-    setCurrentStep((prev) => prev + 1);
+
+    if (currentStep < storySteps.length - 1) {
+      setCurrentStep((prev) => prev + 1);
+    }
   };
 
   const handleDecision = () => {
-    setCurrentStep((prev) => prev + 1);
-    setIsAudioPlaying(true);
+    if (currentStep < storySteps.length - 1) {
+      setCurrentStep((prev) => prev + 1);
+      setIsAudioPlaying(true);
+    }
   };
 
   return (
-    <div className="relative h-screen bg-black overflow-hidden p-6">
+    <div className="relative h-screen bg-black overflow-scroll p-6">
       {!started && (
         <div className="absolute inset-0 flex items-center justify-center">
           <button
@@ -98,7 +107,9 @@ export default function StarWarsNarrative() {
               } ${step.type === "narration" ? "text-yellow-500" : ""}`}
             >
               {step.type === "narration" && (
-                <p className="text-2xl font-bold mb-4">{step.content}</p>
+                <p className="text-3xl font-bold leading-relaxed mb-6">
+                  {step.content}
+                </p>
               )}
               {step.type === "decision" && !isAudioPlaying && (
                 <div className="text-center space-y-4">
@@ -106,7 +117,7 @@ export default function StarWarsNarrative() {
                   {step.options.map((option, index) => (
                     <button
                       key={index}
-                      className="bg-gray-800 text-white py-2 px-4 rounded hover:bg-gray-700"
+                      className="bg-gray-700 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors"
                       onClick={handleDecision}
                     >
                       {option}
