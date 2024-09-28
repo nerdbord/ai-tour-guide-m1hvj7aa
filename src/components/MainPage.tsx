@@ -8,7 +8,10 @@ type Props = {};
 export const MainPage = (props: Props) => {
   return (
     <div>
-      <Button color="white">Moje historie</Button>
+      <div>
+        <Button color="white">Moje historie</Button>
+      </div>
+
       <h1 className="text-3xl not-italic font-bold mt-[78px]">
         Czego chcesz się nauczyć?
       </h1>
