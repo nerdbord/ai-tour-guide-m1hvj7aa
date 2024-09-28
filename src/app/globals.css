@@ -26,6 +26,7 @@ body {
   }
 }
 
+
 @keyframes scroll {
   0% {
     bottom: -100%;
@@ -37,4 +38,13 @@ body {
 
 .animate-scroll {
   animation: scroll 5s linear forwards;
+}
+
+.scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.scrollbar-hide {
+  -ms-overflow-style: none; /* Internet Explorer 10+ */
+  scrollbar-width: none; /* Firefox */
 }
