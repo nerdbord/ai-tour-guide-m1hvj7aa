@@ -56,7 +56,7 @@ export const CapturePicture: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen md:h-4/5">
+    <div className="flex flex-col min-h-screen h-4/5">
       {/* Header */}
       <div className="h-16 w-full"></div>
 
