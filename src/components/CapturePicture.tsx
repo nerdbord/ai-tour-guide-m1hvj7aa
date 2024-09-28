@@ -56,29 +56,25 @@ export const CapturePicture: React.FC = () => {
   };
 
   return (
-    <div className="flex flex-col min-h-screen h-4/5">
+    <div className="flex flex-col">
       {/* Header */}
       <div className="h-16 w-full"></div>
 
       {/* Camera Section */}
-      <div className="flex-grow flex items-center justify-center w-full relative">
+      <div className="flex-grow flex items-center justify-center w-full h-4/5 relative">
         {loading ? (
           <p>Loading...</p>
         ) : image ? (
-          <img
-            src={image}
-            alt="Captured"
-            className="max-h-full max-w-full p-4"
-          />
+          <img src={image} alt="Captured" className=" px-4" />
         ) : cameraError ? (
-          <div className="p-4 max-w-full max-h-full">
+          <div className="p-4 max-w-full ">
             <p>{cameraError}</p>
           </div>
         ) : (
           <>
             <video
               ref={videoRef}
-              className="w-full h-full object-cover"
+              className="w-full h-full px-4 object-cover"
               autoPlay
               playsInline
               muted
