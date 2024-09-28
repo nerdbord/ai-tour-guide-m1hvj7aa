@@ -1,3 +1,8 @@
+import { MainPage } from "@/components/MainPage";
 export default function Home() {
-  return <main>main</main>;
+  return (
+    <main className="py-8 px-4">
+      <MainPage />
+    </main>
+  );
 }
