@@ -2,6 +2,8 @@
 import React, { useState, useEffect } from "react";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
+import Link from "next/link";
+import { SlCamera } from "react-icons/sl";
 
 interface Material {
   id: number;
@@ -9,8 +11,8 @@ interface Material {
 }
 
 interface SelectMaterialsProps {
-  onSelectedMaterialsChange: (materials: Material[]) => void; // Prop do przekazania wybranych materiałów do MainPage
-  closeSelectMaterials: () => void; // Prop do zamknięcia SelectMaterials
+  onSelectedMaterialsChange: (materials: Material[]) => void;
+  closeSelectMaterials: () => void;
 }
 
 export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
@@ -30,7 +32,6 @@ export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
     { id: 8, title: "Card 8" },
     { id: 9, title: "Card 9" },
     { id: 10, title: "Card 10" },
-    { id: 11, title: "Card 11" },
   ];
 
   const handleCardClick = (card: Material) => {
@@ -46,21 +47,38 @@ export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
   };
 
   useEffect(() => {
-    onSelectedMaterialsChange(selectedMaterials); // Wywołaj prop za każdym razem, gdy selectedMaterials się zmieni
+    onSelectedMaterialsChange(selectedMaterials);
   }, [selectedMaterials, onSelectedMaterialsChange]);
 
   const handleAddSelected = () => {
-    onSelectedMaterialsChange(selectedMaterials); // Przekazujemy wybrane materiały do rodzica
-    closeSelectMaterials(); // Zamykamy okno
+    onSelectedMaterialsChange(selectedMaterials);
+    closeSelectMaterials();
   };
 
   return (
-    <div className="z-10 bg-slate-500 w-full absolute pt-6 pb-12 px-4 left-0 bottom-0 right-0">
-      <p className="text-lg not-italic font-medium leading-6 pb-4">
-        Wybierz materiały
-      </p>
+    <div className="z-10 main-bg w-full absolute pt-6 pb-12 px-4 left-0 bottom-0 right-0 top-0">
+      <div className="pb-11 flex justify-between items-start">
+        <div>
+          <p className="text-lg not-italic font-medium leading-6 pb-2">
+            Wybierz zdjęcia
+          </p>
+          <p className="text-sm not-italic font-semibold">
+            Dałeś/aś dostęp aplikacji do <br /> wybranej liczby zdjęć
+          </p>
+        </div>
+        <Link className="second-bg py-1 px-3 rounded-full" href="/about">
+          Zarządzaj
+        </Link>
+      </div>
+
       {/* Grid z kartami */}
-      <div className="grid grid-cols-2 gap-4 pb-4 overflow-y-scroll max-h-96 scrollbar-hide">
+      <div className="grid grid-cols-2 gap-1 pb-4 overflow-y-scroll max-h-96 scrollbar-hide">
+        <Link
+          className="relative border p-4 rounded second-bg h-32 cursor-pointer flex items-center justify-center"
+          href={"/capture"}
+        >
+          <SlCamera className="h-[60px] w-[60px]" />
+        </Link>
         {cardsData.map((card) => (
           <Card
             key={card.id}
@@ -70,11 +88,8 @@ export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
           />
         ))}
       </div>
-      <div className="flex gap-3 pt-4">
-        <Button color="white">Zrób zdjęcie</Button>
-        <Button color="black" onClick={handleAddSelected}>
-          Dodaj wybrane
-        </Button>
+      <div className="flex items-center justify-center gap-3 pt-9">
+        <Button onClick={handleAddSelected}>Dodaj wybrane</Button>
       </div>
     </div>
   );

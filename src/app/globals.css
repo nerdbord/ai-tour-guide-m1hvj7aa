@@ -26,7 +26,6 @@ body {
   }
 }
 
-
 @keyframes scroll {
   0% {
     bottom: -100%;
@@ -47,4 +46,23 @@ body {
 .scrollbar-hide {
   -ms-overflow-style: none; /* Internet Explorer 10+ */
   scrollbar-width: none; /* Firefox */
+}
+
+.main-bg {
+  background: linear-gradient(180deg, #1a1534 0%, #3e1361 100%);
+}
+
+.btn-primary {
+  display: inline-flex;
+  padding: 16px 40px 16px 32px;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+  border-radius: 69px;
+  border: 2px solid #e935c5;
+  background: linear-gradient(90deg, #301b2e 2%, #2e0427 100%);
+}
+
+.second-bg {
+  background: rgba(255, 255, 255, 0.1);
 }

@@ -11,14 +11,12 @@ interface CardProps {
 export const Card: React.FC<CardProps> = ({ title, isSelected, onClick }) => {
   return (
     <div
-      className={`relative border p-4 bg-white h-32 cursor-pointer ${
-        isSelected ? "border-green-500" : ""
-      }`}
+      className={`relative border p-4 rounded second-bg h-32 cursor-pointer `}
       onClick={onClick}
     >
       <h2 className="text-lg font-semibold">{title}</h2>
       {isSelected && (
-        <div className="absolute top-2 right-2 text-green-500">
+        <div className="absolute top-2 right-2 ">
           <FaCheckCircle size={24} />
         </div>
       )}
