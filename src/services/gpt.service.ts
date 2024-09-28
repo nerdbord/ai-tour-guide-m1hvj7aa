@@ -2,7 +2,7 @@
 
 import { openai } from "../../openai.config";
 
-export const convertImgToText = async (prompt: string, imgUrl: string) => {
+export const convertImgToText = async (prompt: string, imgUrls: string[]) => {
   const resp = await generateText({
     model: openai("gpt-4o"),
     messages: [
@@ -10,7 +10,7 @@ export const convertImgToText = async (prompt: string, imgUrl: string) => {
         role: "user",
         content: [
           { type: "text", text: prompt },
-          { type: "image", image: imgUrl },
+          ...imgUrls.map(u => ({ type: "image" as const, image: u })),
         ],
       },
     ],
