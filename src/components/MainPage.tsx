@@ -66,7 +66,7 @@ export const MainPage = (props: Props) => {
               <HiPlus className="text-white" /> <p>Dodaj więcej</p>
             </div>
           </div>
-          <div className="overflow-y-scroll max-h-[300px] h-[200px] scrollbar-hide rounded-lg p-2">
+          <div className="overflow-y-scroll max-h-[300px] h-[200px] scrollbar-hide rounded-lg pt-1">
             {selectedMaterials.map((material) => (
               <ListItem
                 key={material.id}
