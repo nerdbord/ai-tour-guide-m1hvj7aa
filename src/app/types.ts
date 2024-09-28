@@ -1,7 +1,8 @@
 // Main story interface
-interface Story {
-    steps: StoryStep[];
-    context: StoryContext; // Specific context data needed for story generation
+export interface Story {
+  steps: StoryStep[];
+  context: StoryContext;
+  pastDecisions: DecisionRecord[];
 }
 
 // Type of a story step, which can be a narration or a decision
@@ -9,40 +10,37 @@ type StoryStep = Narration | Decision;
 
 // Interface for a narration step
 interface Narration {
-    type: 'narration';
-    content: string;
+  type: "narration";
+  content: string;
 }
 
 // Interface for a decision step
 interface Decision {
-    type: 'decision';
-    question: string;
-    options: DecisionOption[];
+  type: "decision";
+  question: string;
+  options: DecisionOption[];
 }
 
-// Interface for an option in a decision step
+// Interface for a decision option
 interface DecisionOption {
-    optionText: string;
-    // Parameters needed to generate subsequent steps based on the user's choice
-    generationParameters: GenerationParameters;
+  optionText: string;
+  generationParameters: GenerationParameters;
 }
 
-// Interface for parameters to generate subsequent steps
+// Interface for parameters to generate next steps
 interface GenerationParameters {
-    decision: string; // The user's decision that influences the next part of the story
-    topicKeywords: string[]; // Keywords related to the next content to generate
+  // Dynamic properties that influence the next part of the story
+  [key: string]: unknown;
 }
 
-// Specific context data needed for story generation
+// Story context interface
 interface StoryContext {
-    extractedText: string; // Text extracted from OCR
-    keyConcepts: string[]; // Key concepts identified from the extracted text
-    userPreferences: UserPreferences; // User-specific settings or preferences
+  // Dynamic properties that represent the current state of the story
+  [key: string]: unknown;
 }
 
-// User-specific settings or preferences
-interface UserPreferences {
-    language: string; // Language of the story
-    difficultyLevel: 'easy' | 'medium' | 'hard'; // Difficulty level of the content
-    learningGoals: string[]; // Specific learning goals or topics
+// Record of a decision made by the user
+interface DecisionRecord {
+  decisionIndex: number; // Index of the decision step in the steps array
+  optionIndex: number; // Index of the selected option in the options array
 }
