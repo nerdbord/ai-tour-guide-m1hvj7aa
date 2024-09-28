@@ -1,10 +1,11 @@
 "use server";
-import { ElevenLabsClient } from "elevenlabs";
+import { ElevenLabsClient, play } from "elevenlabs";
 import * as fs from "node:fs";
 import path from "node:path";
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
+import { Readable } from "node:stream";
 
 const elevenlabs = new ElevenLabsClient({
   apiKey: process.env.ELEVENLABS_API_KEY,
@@ -19,18 +20,6 @@ const StoryStepSchema = z.object({
 });
 
 export type StoryStepType = z.infer<typeof StoryStepSchema>;
-
-// Convert a readable stream to a buffer
-const streamToBuffer = (
-  readableStream: NodeJS.ReadableStream,
-): Promise<Buffer> => {
-  return new Promise((resolve, reject) => {
-    const chunks: Buffer[] = [];
-    readableStream.on("data", (chunk) => chunks.push(Buffer.from(chunk)));
-    readableStream.on("end", () => resolve(Buffer.concat(chunks)));
-    readableStream.on("error", (err) => reject(err));
-  });
-};
 
 export const generateStoryStepTextSlice = async (params: {
   context: string;
@@ -60,46 +49,45 @@ export const generateStoryStepTextSlice = async (params: {
   }
 };
 
+// Function to generate audio and save it
 export const generateStoryStepAudioSlice = async (params: {
   text: string;
   storyId: string;
   stepId: string;
-}): Promise<string | null> => {
-  // Updated return type to include null
+}) => {
   try {
-    console.log("gen audio");
+    console.log("Starting audio generation...");
+
+    // Generate audio using ElevenLabs API
     const audioStream = await elevenlabs.generate({
-      voice: "Rachel",
+      voice: "Brian",
       text: params.text,
-      model_id: "eleven_multilingual_v2",
+      model_id: "eleven_turbo_v2_5",
     });
 
-    // Convert the stream to a buffer
-    const audioBuffer = await streamToBuffer(audioStream);
+    // Define the output file path
+    const outputPath = `/audio/audio_${params.storyId}_${params.stepId}.mp3`;
 
-    console.log("audioBuffer", audioBuffer);
+    // Create a writable stream to the output file
+    const writeStream = fs.createWriteStream("public" + outputPath);
 
-    // Define the file path
-    const filePath = path.join(
-      process.cwd(),
-      "public",
-      "stories",
-      params.storyId,
-      `${params.stepId}.mp3`,
-    );
+    // Pipe the audio stream to the file
+    audioStream.pipe(writeStream);
 
-    console.log("filePath", filePath);
+    // Return a promise that resolves when the file is fully written
+    return new Promise((resolve, reject) => {
+      writeStream.on("finish", () => {
+        console.log("Audio saved successfully at", outputPath);
+        resolve(outputPath);
+      });
 
-    // Ensure the directory exists
-    fs.mkdirSync(path.dirname(filePath), { recursive: true });
-
-    // Save the audio file
-    fs.writeFileSync(filePath, audioBuffer);
-
-    console.log(`Audio saved successfully at: ${filePath}`);
-    return filePath; // Return the file path as a string
+      writeStream.on("error", (err) => {
+        console.error("Error writing audio to file:", err);
+        reject(err);
+      });
+    });
   } catch (error) {
     console.error("Error generating story audio:", error);
-    return null; // Return null in case of an error
+    return null;
   }
 };

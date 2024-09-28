@@ -18,12 +18,11 @@ interface Decision {
   type: "decision";
   question: string;
   options: string[];
-  audioUrl: string;
   selectedOption?: string;
 }
 
 export default function StarWarsNarrative() {
-  const [currentStep, setCurrentStep] = useState(3);
+  const [currentStep, setCurrentStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
   const [storySteps, setStorySteps] = useState<StoryStep[]>([
     {
@@ -42,7 +41,6 @@ export default function StarWarsNarrative() {
       type: "decision",
       question: "Gdzie chciałbyś pójść najpierw?",
       options: ["Odwiedź Koloseum", "Przejdź się po Forum Romanum"],
-      audioUrl: "../../audio/narration4.mp3",
     },
   ]);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
@@ -90,6 +88,8 @@ export default function StarWarsNarrative() {
       .map((decision) => decision.question);
 
     try {
+      setIsGenerating(true);
+
       // Generate text for the next step based on context and decision
       const nextSteps = await generateStoryStepTextSlice({
         context,
@@ -99,35 +99,33 @@ export default function StarWarsNarrative() {
         previousDecisions,
       });
 
-      console.log("nextSteps", nextSteps);
-
       if (!nextSteps) {
         throw new Error("Failed to generate text for the story step.");
       }
 
-      // // Generate audio for the generated text
-      // const audioUrl = await generateStoryStepAudioSlice({
-      //   text: nextSteps,
-      //   storyId,
-      //   stepId,
-      // });
-      //
-      // if (!audioUrl) {
-      //   throw new Error("Failed to generate audio for the story step.");
-      // }
+      const audioPath = await generateStoryStepAudioSlice({
+        text: nextSteps.narrativeStep,
+        stepId,
+        storyId,
+      });
 
-      // Create new narration step
+      console.log("audioResponse", audioPath);
+
+      if (!audioPath && typeof audioPath !== "string") {
+        throw new Error("Failed to generate audio for the story step.");
+      }
+
+      // Create new narration step with the audio URL
       const newNarrativeStep: Narration = {
         type: "narration",
         content: nextSteps.narrativeStep,
-        audioUrl: "", // Ensure audioUrl is a string
+        audioUrl: audioPath as string,
       };
 
       const newDecisionStep: Decision = {
         type: "decision",
         question: nextSteps.decisionStep.text,
         options: nextSteps.decisionStep.options,
-        audioUrl: "", // Ensure audioUrl is a string
       };
 
       // Update the story steps
@@ -136,9 +134,11 @@ export default function StarWarsNarrative() {
         newNarrativeStep,
         newDecisionStep,
       ]);
-      setCurrentStep((prev) => prev + 2);
+      setCurrentStep((prev) => prev + 1);
     } catch (error) {
       console.error("Error generating next story step:", error);
+    } finally {
+      setIsGenerating(false);
     }
   };
 
@@ -171,17 +171,27 @@ export default function StarWarsNarrative() {
               )}
               {step.type === "decision" && !isAudioPlaying && (
                 <div className="text-center space-y-4">
-                  <p className="text-white text-xl mb-4">{step.question}</p>
-                  {step.options.map((option, index) => (
-                    <button
-                      key={index}
-                      disabled={isGenerating}
-                      className="bg-gray-700 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors"
-                      onClick={() => handleDecision(option)}
-                    >
-                      {option}
-                    </button>
-                  ))}
+                  {!isGenerating && (
+                    <p className="text-white text-xl mb-4">{step.question}</p>
+                  )}
+                  {isGenerating ? (
+                    // Loading Indicator
+                    <div className="flex justify-center items-center">
+                      <div className="loader">Generating...</div>
+                    </div>
+                  ) : (
+                    // Decision Options
+                    step.options.map((option, index) => (
+                      <button
+                        key={index}
+                        disabled={isGenerating}
+                        className="bg-gray-700 text-white py-3 px-6 rounded-lg hover:bg-gray-600 transition-colors"
+                        onClick={() => handleDecision(option)}
+                      >
+                        {option}
+                      </button>
+                    ))
+                  )}
                 </div>
               )}
             </div>
