@@ -30,7 +30,13 @@ export const LoadingScreen = (props: Props) => {
         <Garnek />
         {/* Napis nieruchomy, a kropki się zmieniają */}
         <p className="text-center mt-4">
-          Gotujemy dla ciebie opowieść<span>{dots}</span>
+          Gotujemy dla ciebie opowieść
+          {/* Stała szerokość dla kropek */}
+          <span
+            style={{ display: "inline-block", width: "1em", textAlign: "left" }}
+          >
+            {dots}
+          </span>
         </p>
       </div>
     </div>
