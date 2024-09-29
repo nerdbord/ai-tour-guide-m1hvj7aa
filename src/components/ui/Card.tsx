@@ -11,7 +11,7 @@ interface CardProps {
 export const Card: React.FC<CardProps> = ({ isSelected, onClick, src }) => {
   return (
     <div
-      className={`relative border p-4 rounded second-bg h-32 cursor-pointer `}
+      className={`relative border  rounded second-bg h-32 cursor-pointer `}
       onClick={onClick}
     >
       <img
