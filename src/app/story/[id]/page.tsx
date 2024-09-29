@@ -125,7 +125,7 @@ export default function StarWarsNarrative() {
       const newDecisionStep: Step = {
         id: stepId,
         type: "DECISION",
-        content: "",
+        content: decisionStep.text,
         audioUrl: null,
         question: decisionStep.text,
         options: decisionStep.options,
@@ -175,7 +175,7 @@ export default function StarWarsNarrative() {
               )}
               {step.type === "DECISION" && !isAudioPlaying && (
                 <div className="text-center space-y-4">
-                  <p className="text-white text-xl mb-4">{step.question}</p>
+                  <p className="text-white text-xl mb-4">{step.content}</p>
                   {isGenerating ? (
                     // Loading Indicator
                     <div className="flex justify-center items-center">

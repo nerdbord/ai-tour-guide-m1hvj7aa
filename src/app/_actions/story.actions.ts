@@ -9,6 +9,7 @@ import { GPTStoryStepType } from "@/services/gpt.service";
 import { redirect } from "next/navigation";
 import { Step } from "@prisma/client";
 import { put } from "@vercel/blob";
+import { PassThrough } from "node:stream";
 
 const elevenlabs = new ElevenLabsClient();
 
@@ -149,7 +150,6 @@ export const generateStoryStepTextSlice = async (params: {
   }
 };
 
-// Function to generate audio and save it
 export const generateStoryStepAudioSlice = async (params: {
   text: string;
   storyId: string;
@@ -165,36 +165,46 @@ export const generateStoryStepAudioSlice = async (params: {
       model_id: "eleven_turbo_v2_5",
     });
 
-    // Define the output file path
-    const outputPath = `/audio/audio_${params.storyId}_${params.stepId}.mp3`;
+    // Use a PassThrough stream to handle the stream properly
+    const passThroughStream = new PassThrough();
 
-    // Create a writable stream to the output file
-    const writeStream = fs.createWriteStream("public" + outputPath);
+    // Pipe the audio stream into the pass-through stream
+    audioStream.pipe(passThroughStream);
 
-    // Pipe the audio stream to the file
-    audioStream.pipe(writeStream);
+    const audioBuffer = await streamToBuffer(passThroughStream);
 
-    // Return a promise that resolves when the file is fully written
-    return new Promise((resolve, reject) => {
-      writeStream.on("finish", async () => {
-        // Upload the audio buffer to Vercel Blob storage
-        const blobResult = await put(outputPath, audioStream, {
-          access: "public",
-        });
+    // Define the file name for the blob storage
+    const filename = `audio_${params.storyId}_${params.stepId}.mp3`;
 
-        console.log("Audio uploaded successfully to", blobResult.url);
-
-        console.log("Audio saved successfully at", outputPath);
-        resolve(outputPath);
-      });
-
-      writeStream.on("error", (err) => {
-        console.error("Error writing audio to file:", err);
-        reject(err);
-      });
+    // Upload the audio buffer to Vercel Blob storage
+    const blobResult = await put(filename, audioBuffer, {
+      access: "public",
     });
+
+    console.log("Audio uploaded successfully to", blobResult.url);
+
+    // Return the URL of the uploaded audio file
+    return blobResult.url;
   } catch (error) {
     console.error("Error generating story audio:", error);
     return null;
   }
+};
+
+// Helper function to convert a stream to a buffer
+const streamToBuffer = async (stream: PassThrough): Promise<Buffer> => {
+  const chunks: Uint8Array[] = [];
+  return new Promise((resolve, reject) => {
+    stream.on("data", (chunk) => {
+      chunks.push(chunk);
+    });
+
+    stream.on("end", () => {
+      resolve(Buffer.concat(chunks));
+    });
+
+    stream.on("error", (err) => {
+      reject(err);
+    });
+  });
 };
