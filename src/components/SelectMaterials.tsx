@@ -18,7 +18,7 @@ interface SelectMaterialsProps {
 
 interface ImageFile {
   image: string; // Base64 string
-  name: string;  // File name
+  name: string; // File name
 }
 
 export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
@@ -42,11 +42,11 @@ export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
   // ];
 
   const handleCardClick = (card: ImageFile) => {
-    setSelectedMaterials(prevSelected => {
-      const isSelected = prevSelected.some(item => item.name === card.name);
+    setSelectedMaterials((prevSelected) => {
+      const isSelected = prevSelected.some((item) => item.name === card.name);
 
       if (isSelected) {
-        return prevSelected.filter(material => material.name !== card.name);
+        return prevSelected.filter((material) => material.name !== card.name);
       } else {
         return [...prevSelected, card];
       }
@@ -64,8 +64,8 @@ export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files ? Array.from(e.target.files) : [];
-    const imageFiles = files.filter((file) => file.type.startsWith('image/')); // Filtruj tylko obrazy
-    
+    const imageFiles = files.filter((file) => file.type.startsWith("image/")); // Filtruj tylko obrazy
+
     const readFiles = imageFiles.map((file) => {
       return new Promise<ImageFile>((resolve, reject) => {
         const reader = new FileReader();
@@ -88,14 +88,14 @@ export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
     <div className="z-10 main-bg w-full absolute pt-6 pb-12 px-4 left-0 bottom-0 right-0 top-0">
       <div className="pb-11 flex justify-between items-start">
         <div>
-          <p className="text-lg not-italic font-medium leading-6 pb-2">
+          <h1 className="text-3xl not-italic font-medium leading-6 pb-2 mt-10">
             Wybierz zdjęcia
-          </p>
-          <p className="text-sm not-italic font-semibold">
+          </h1>
+          <p className="text-sm not-italic font-semibold py-4">
             Dałeś/aś dostęp aplikacji do <br /> wybranej liczby zdjęć
           </p>
         </div>
-        <label className="second-bg py-1 px-3 rounded-full cursor-pointer">
+        {/*         <label className="second-bg py-1 px-3 rounded-full cursor-pointer ">
           Zarządzaj
           <input
             multiple
@@ -104,7 +104,7 @@ export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
             onChange={handleFileChange}
             className="hidden"
           />
-        </label>
+        </label> */}
         {/* <Link className="second-bg py-1 px-3 rounded-full" href="/about">
           Zarządzaj
         </Link> */}
@@ -112,25 +112,45 @@ export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
 
       {/* Grid z kartami */}
       <div className="grid grid-cols-2 gap-1 pb-4 overflow-y-scroll max-h-96 scrollbar-hide">
-        <Link
+        {/*        <Link
           className="relative border p-4 rounded second-bg h-32 cursor-pointer flex items-center justify-center"
           href={"/capture"}
         >
           <SlCamera className="h-[60px] w-[60px]" />
-        </Link>
+        </Link> */}
         {images.map((card, idx) => (
           <Card
             key={idx}
             // title={card.title}
             src={card.image}
-            isSelected={selectedMaterials.some(item => item.name === card.name)}
+            isSelected={selectedMaterials.some(
+              (item) => item.name === card.name
+            )}
             onClick={() => handleCardClick(card)}
           />
         ))}
       </div>
       <div className="flex items-center justify-center gap-3 pt-9">
-        <Button onClick={handleAddSelected}>Dodaj wybrane</Button>
+        <label className="btn-primary cursor-pointer">
+          Dodaj zdjęcia
+          <input
+            multiple
+            type="file"
+            accept=".png, .jpg, .jpeg"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+        </label>
       </div>
+
+      {/* Przycisk "Załaduj" pojawia się, gdy są wybrane materiały */}
+      {selectedMaterials.length > 0 && (
+        <div className="flex items-center justify-center gap-3 pt-4">
+          <Button onClick={handleAddSelected} className="btn-secondary">
+            Załaduj wybrane
+          </Button>
+        </div>
+      )}
     </div>
   );
 };
