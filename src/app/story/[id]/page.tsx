@@ -96,16 +96,28 @@ export default function StarWarsNarrative() {
       }
 
       // Create new narration step with the audio URL
-      const newNarrativeStep = {
+      const newNarrativeStep: Step = {
+        id: stepId,
         type: "NARRATION",
         content: nextSteps.narrativeStep,
         audioUrl: audioPath as string,
+        question: null,
+        options: [],
+        selectedOption: null,
+        storyId: storyId,
+        order: storySteps.length,
       };
 
-      const newDecisionStep = {
+      const newDecisionStep: Step = {
+        id: stepId,
         type: "DECISION",
+        content: "",
+        audioUrl: null,
         question: nextSteps.decisionStep.text,
         options: nextSteps.decisionStep.options,
+        selectedOption: null,
+        storyId: storyId,
+        order: storySteps.length + 1,
       };
 
       // Update the story steps
