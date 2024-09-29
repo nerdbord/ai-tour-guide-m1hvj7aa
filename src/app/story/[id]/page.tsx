@@ -6,6 +6,7 @@ import {
   fetchStoryById,
   generateStoryStepAudioSlice,
   generateStoryStepTextSlice,
+  updateStep,
 } from "@/app/_actions/story.actions";
 import { useParams } from "next/navigation";
 import { Step } from "@prisma/client";
@@ -20,14 +21,15 @@ export default function StarWarsNarrative() {
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
   const params = useParams();
+  const storyId = params.id as string;
 
   useEffect(() => {
-    fetchStoryById(params.id as string).then((story) => {
+    fetchStoryById(storyId).then((story) => {
       if (story) {
         setStorySteps(story.steps);
       }
     });
-  }, [params.id]);
+  }, [storyId]);
 
   useEffect(() => {
     if (
@@ -70,8 +72,6 @@ export default function StarWarsNarrative() {
       return;
     }
 
-    const stepId = `step-${Date.now()}`;
-    const storyId = "your-story-id"; // Replace with actual story ID
     const context = storySteps
       .filter((step): step is Step => step.type === "NARRATION")
       .map((step) => step.content)
@@ -88,20 +88,53 @@ export default function StarWarsNarrative() {
       const nextSteps = await generateStoryStepTextSlice({
         context,
         text: option,
-        storyId,
-        stepId,
         previousDecisions,
       });
+
+      const narrativeStep = await createStep(storyId, {
+        type: "NARRATION",
+        question: null,
+        options: [],
+        selectedOption: null,
+        story: {
+          connect: {
+            id: storyId,
+          },
+        },
+        order: storySteps.length,
+        content: nextSteps?.narrativeStep || "",
+      });
+
+      if (!narrativeStep) {
+        throw new Error("Failed to generate text for the story step.");
+      }
+
+      const decisionStep = await createStep(storyId, {
+        type: "DECISION",
+        content: nextSteps?.decisionStep.text || "",
+        audioUrl: null,
+        question: nextSteps?.decisionStep.text || "",
+        options: nextSteps?.decisionStep.options,
+        selectedOption: null,
+        order: storySteps.length + 1,
+        story: {
+          connect: {
+            id: storyId,
+          },
+        },
+      });
+
+      if (!decisionStep) {
+        throw new Error("Failed to generate text for the story step.");
+      }
 
       if (!nextSteps) {
         throw new Error("Failed to generate text for the story step.");
       }
 
-      const { narrativeStep, decisionStep } = nextSteps;
-
       const audioPath = await generateStoryStepAudioSlice({
-        text: narrativeStep,
-        stepId,
+        text: narrativeStep.content,
+        stepId: narrativeStep.id,
         storyId,
       });
 
@@ -109,41 +142,17 @@ export default function StarWarsNarrative() {
         throw new Error("Failed to generate audio for the story step.");
       }
 
-      // Create new narration step with the audio URL
-      const newNarrativeStep: Step = {
-        id: stepId,
-        type: "NARRATION",
-        content: narrativeStep,
+      const updatedNarrativeStep = await updateStep(narrativeStep.id, {
         audioUrl: audioPath as string,
-        question: null,
-        options: [],
-        selectedOption: null,
-        storyId: storyId,
-        order: storySteps.length,
-      };
-
-      const newDecisionStep: Step = {
-        id: stepId,
-        type: "DECISION",
-        content: decisionStep.text,
-        audioUrl: null,
-        question: decisionStep.text,
-        options: decisionStep.options,
-        selectedOption: null,
-        storyId: storyId,
-        order: storySteps.length + 1,
-      };
+      });
 
       // Update the story steps
       setStorySteps((prevSteps) => [
         ...prevSteps,
-        newNarrativeStep,
-        newDecisionStep,
+        updatedNarrativeStep,
+        decisionStep,
       ]);
       setCurrentStep((prev) => prev + 1);
-
-      await createStep(storyId, newNarrativeStep);
-      await createStep(storyId, newDecisionStep);
     } catch (error) {
       console.error("Error generating next story step:", error);
     } finally {

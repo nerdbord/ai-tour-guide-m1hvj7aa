@@ -7,7 +7,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { GPTStoryStepType } from "@/services/gpt.service";
 import { redirect } from "next/navigation";
-import { Step } from "@prisma/client";
+import { Prisma, Step } from "@prisma/client";
 import { put } from "@vercel/blob";
 import { PassThrough } from "node:stream";
 
@@ -34,7 +34,10 @@ export const fetchStoryById = async (storyId: string) => {
   });
 };
 
-export const createStep = async (storyId: string, step: Step) => {
+export const createStep = async (
+  storyId: string,
+  step: Prisma.StepCreateInput,
+) => {
   if (step.type === "DECISION") {
     const createdStep = await prisma.step.create({
       data: {
@@ -126,8 +129,6 @@ export const createNewStory = async (
 export const generateStoryStepTextSlice = async (params: {
   context: string;
   text: string;
-  storyId: string;
-  stepId: string;
   previousDecisions: string[];
 }) => {
   // Updated to return string or null
@@ -148,6 +149,15 @@ export const generateStoryStepTextSlice = async (params: {
     console.error("Error generating story text:", error);
     return null; // Return null in case of an error
   }
+};
+
+export const updateStep = async (stepId: string, data: Partial<Step>) => {
+  return await prisma.step.update({
+    where: {
+      id: stepId,
+    },
+    data,
+  });
 };
 
 export const generateStoryStepAudioSlice = async (params: {
