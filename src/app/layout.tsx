@@ -1,19 +1,19 @@
 import type { Metadata } from "next";
 import "./globals.css";
-import { Lora } from "next/font/google";
+import { Lora, Inter } from "next/font/google"; // Import czcionek
 
-const lora = Lora({
+export const lora = Lora({
   subsets: ["latin"],
   variable: "--font-lora",
   weight: ["400", "500", "600", "700"],
 });
 
-/* const nunitoSans = Nunito_Sans({
+const inter = Inter({
   subsets: ["latin"],
-  variable: "--font-nunito-sans",
-  weight: ["200", "300", "400", "600", "700", "800", "900"],
+  variable: "--font-inter",
+  weight: ["400", "500", "600", "700", "800"],
 });
- */
+
 export const metadata: Metadata = {
   title: "ByKociołek",
   description: "tutaj opis",
@@ -27,7 +27,7 @@ export default function RootLayout({
   return (
     <html lang="en">
       <body
-        className={` ${lora.className} flex justify-center items-start min-h-full`}
+        className={` ${lora.className} ${inter.className} flex justify-center items-start min-h-full`}
       >
         <div
           className="flex flex-col justify-between 
