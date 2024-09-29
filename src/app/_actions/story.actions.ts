@@ -7,6 +7,7 @@ import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { GPTStoryStepType } from "@/services/gpt.service";
 import { redirect } from "next/navigation";
+import { Step } from "@prisma/client";
 
 const elevenlabs = new ElevenLabsClient({
   apiKey: process.env.ELEVENLABS_API_KEY,
@@ -31,6 +32,36 @@ export const fetchStoryById = async (storyId: string) => {
       steps: true,
     },
   });
+};
+
+export const createStep = async (storyId: string, step: Step) => {
+  if (step.type === "DECISION") {
+    const createdStep = await prisma.step.create({
+      data: {
+        storyId,
+        type: step.type,
+        content: step.question || "",
+        options: step.options,
+        audioUrl: "",
+        order: 0,
+      },
+    });
+    return createdStep;
+  }
+
+  if (step.type === "NARRATION") {
+    const createdStep = await prisma.step.create({
+      data: {
+        storyId,
+        type: step.type,
+        content: step.content,
+        question: step.content,
+        audioUrl: "",
+        order: 0,
+      },
+    });
+    return createdStep;
+  }
 };
 
 // Function to create a new story
@@ -59,7 +90,6 @@ export const createNewStory = async (
           order: stepOrder++,
         },
       });
-      console.log("step", step);
     }
 
     if (step.type === "NARRATION") {
@@ -68,6 +98,7 @@ export const createNewStory = async (
           storyId: story.id,
           type: step.type,
           content: step.content,
+          question: step.content,
           audioUrl: "",
           order: stepOrder++,
         },
@@ -101,7 +132,6 @@ export const generateStoryStepTextSlice = async (params: {
 }) => {
   // Updated to return string or null
   try {
-    console.log("gen text");
     const { object } = await generateObject({
       model: openai("gpt-4o"),
       schema: StoryStepSchema,

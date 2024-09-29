@@ -2,6 +2,7 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import {
+  createStep,
   fetchStoryById,
   generateStoryStepAudioSlice,
   generateStoryStepTextSlice,
@@ -20,9 +21,8 @@ export default function StarWarsNarrative() {
   const params = useParams();
 
   useEffect(() => {
-    fetchStoryById(params.id as string).then(story => {
+    fetchStoryById(params.id as string).then((story) => {
       if (story) {
-        console.log("story.steps", story.steps);
         setStorySteps(story.steps);
       }
     });
@@ -36,7 +36,7 @@ export default function StarWarsNarrative() {
     ) {
       // @ts-expect-error
       audioRef.current.src = storySteps[currentStep].audioUrl;
-      audioRef.current.play().catch(error => {
+      audioRef.current.play().catch((error) => {
         console.log("Audio playback failed:", error);
       });
       setIsAudioPlaying(true);
@@ -53,21 +53,32 @@ export default function StarWarsNarrative() {
     }
 
     if (currentStep < storySteps.length - 1) {
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
     }
   };
 
   const handleDecision = async (option: string) => {
+    // Check if there's already a decision step available after the current step
+    const nextStepIndex = currentStep + 1;
+    if (
+      nextStepIndex < storySteps.length &&
+      storySteps[nextStepIndex]?.type === "NARRATION"
+    ) {
+      // If a next step is available, just move to the next step
+      setCurrentStep((prev) => prev + 1);
+      return;
+    }
+
     const stepId = `step-${Date.now()}`;
     const storyId = "your-story-id"; // Replace with actual story ID
     const context = storySteps
       .filter((step): step is Step => step.type === "NARRATION")
-      .map(step => step.content)
+      .map((step) => step.content)
       .join(" ");
 
     const previousDecisions = storySteps
       .filter((step): step is Step => step.type === "DECISION")
-      .map(decision => decision.question || "");
+      .map((decision) => decision.question || "");
 
     try {
       setIsGenerating(true);
@@ -85,8 +96,10 @@ export default function StarWarsNarrative() {
         throw new Error("Failed to generate text for the story step.");
       }
 
+      const { narrativeStep, decisionStep } = nextSteps;
+
       const audioPath = await generateStoryStepAudioSlice({
-        text: nextSteps.narrativeStep,
+        text: narrativeStep,
         stepId,
         storyId,
       });
@@ -99,7 +112,7 @@ export default function StarWarsNarrative() {
       const newNarrativeStep: Step = {
         id: stepId,
         type: "NARRATION",
-        content: nextSteps.narrativeStep,
+        content: narrativeStep,
         audioUrl: audioPath as string,
         question: null,
         options: [],
@@ -113,20 +126,23 @@ export default function StarWarsNarrative() {
         type: "DECISION",
         content: "",
         audioUrl: null,
-        question: nextSteps.decisionStep.text,
-        options: nextSteps.decisionStep.options,
+        question: decisionStep.text,
+        options: decisionStep.options,
         selectedOption: null,
         storyId: storyId,
         order: storySteps.length + 1,
       };
 
       // Update the story steps
-      setStorySteps(prevSteps => [
+      setStorySteps((prevSteps) => [
         ...prevSteps,
         newNarrativeStep,
         newDecisionStep,
       ]);
-      setCurrentStep(prev => prev + 1);
+      setCurrentStep((prev) => prev + 1);
+
+      await createStep(storyId, newNarrativeStep);
+      await createStep(storyId, newDecisionStep);
     } catch (error) {
       console.error("Error generating next story step:", error);
     } finally {
