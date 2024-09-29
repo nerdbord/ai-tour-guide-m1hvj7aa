@@ -6,6 +6,7 @@ import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
 import { GPTStoryStepType } from "@/services/gpt.service";
+import { redirect } from "next/navigation";
 
 const elevenlabs = new ElevenLabsClient({
   apiKey: process.env.ELEVENLABS_API_KEY,
@@ -43,8 +44,6 @@ export const createNewStory = async (
     },
   });
 
-  console.log("story", story);
-
   // Get the current step count to determine the order
   let stepOrder = 0;
 
@@ -64,7 +63,7 @@ export const createNewStory = async (
     }
 
     if (step.type === "NARRATION") {
-      await prisma.step.create({
+      const createdStep = await prisma.step.create({
         data: {
           storyId: story.id,
           type: step.type,
@@ -73,10 +72,24 @@ export const createNewStory = async (
           order: stepOrder++,
         },
       });
-      console.log("step", step);
+      const generatedAudio = await generateStoryStepAudioSlice({
+        text: step.content,
+        storyId: story.id,
+        stepId: createdStep.id,
+      });
+
+      await prisma.step.update({
+        where: {
+          id: createdStep.id,
+        },
+        data: {
+          audioUrl: generatedAudio as string,
+        },
+      });
     }
   }
-  return story;
+
+  redirect(`/story/${story.id}`);
 };
 
 export const generateStoryStepTextSlice = async (params: {
