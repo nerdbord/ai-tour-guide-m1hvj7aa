@@ -1,10 +1,11 @@
 /* eslint-disable @typescript-eslint/no-empty-object-type */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 "use client";
-import React from "react";
+import React, { useState } from "react";
 import { Button } from "./ui/Button";
 import { generateStoryStepsAction } from "@/app/_actions/generateStorySteps";
 import { createNewStory } from "@/app/_actions/story.actions";
+import { LoadingScreen } from "@/components/LoadingScreen";
 
 type Props = {
   extractedText: string;
@@ -12,16 +13,29 @@ type Props = {
 };
 
 export const StoryPage = (props: Props) => {
+  const [isCreating, setIsCreating] = useState(false);
+
   const handleCreateStory = async () => {
-    const storySteps = await generateStoryStepsAction(
-      props.extractedText,
-      props.keyConcepts,
-    );
+    setIsCreating(true);
+    try {
+      const storySteps = await generateStoryStepsAction(
+        props.extractedText,
+        props.keyConcepts,
+      );
 
-    // add logic to save story to db
+      // add logic to save story to db
 
-    await createNewStory(storySteps.title, storySteps.steps);
+      await createNewStory(storySteps.title, storySteps.steps);
+    } catch (error) {
+      console.log(error);
+    } finally {
+      setIsCreating(false);
+    }
   };
+
+  if (isCreating) {
+    return <LoadingScreen />;
+  }
 
   return (
     <div className="flex flex-col justify-between items-center w-full h-full px-4">
