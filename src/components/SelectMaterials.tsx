@@ -34,14 +34,17 @@ export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
     });
   };
 
-  const handleAddSelected = () => {
+  const handleAddSelected = async () => {
     setIsProcessing(true); // Rozpocznij przetwarzanie
     setHasSeenInitialScreen(true); // Ustaw, że użytkownik zobaczył ekran początkowy
-    setTimeout(() => {
-      onSelectedMaterialsChange(selectedMaterials);
+
+    try {
+      // Czekaj na wywołanie funkcji przetwarzania
+      await onSelectedMaterialsChange(selectedMaterials);
+    } finally {
+      setIsProcessing(false); // Zakończ przetwarzanie po zakończeniu operacji
       closeSelectMaterials();
-      setIsProcessing(false); // Symulacja zakończenia przetwarzania
-    }, 4000); // Symulacja procesu trwającego 2 sekundy
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
