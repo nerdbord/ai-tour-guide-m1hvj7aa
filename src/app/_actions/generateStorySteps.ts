@@ -1,4 +1,6 @@
-﻿import { generateStorySteps } from "@/services/gpt.service";
+﻿"use server";
+
+import { generateStorySteps } from "@/services/gpt.service";
 
 export const generateStoryStepsAction = async (
   text: string,

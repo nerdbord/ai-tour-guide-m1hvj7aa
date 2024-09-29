@@ -22,9 +22,14 @@ const DecisionSchema = z
   })
   .describe("Decision");
 
-const StoryStepSchema = z.object({
-  storySteps: z.array(z.union([NarrationSchema, DecisionSchema])),
+const StoryStepSchema = z.union([NarrationSchema, DecisionSchema]);
+
+const StoryStepsSchema = z.object({
+  title: z.string(),
+  steps: z.array(z.union([NarrationSchema, DecisionSchema])),
 });
+
+export type GPTStoryStepType = z.infer<typeof StoryStepSchema>;
 
 export const convertImgToText = async (imgUrls: string[]) => {
   const PROMPT =
@@ -53,14 +58,14 @@ export const generateStorySteps = async (
 ) => {
   const str = keyConcepts.join("");
 
-  const PROMPT = `Jesteś asystentem ucznia pomagającym w nauce poprzez tworzenie ciekawych historii na bazie przekazanych materiałów. Materiały zawierają tekst z podręcznika ${text} oraz kilka zagadnień ${str} które uczeń ma przyswoić. Zbuduj na podstawie tego tekstu historię, dzieląc ją na etapy narracyjne {type: "narration"} oraz elementy interaktywny, które będą polegały na podjęciu decyzji przez ucznia {type: "decision"}. Zwróć tylko etapy do pierwszego etapu typu "decision". Etap typu "decision" powinien pojawić się od razu po fragmencie, który zawiera odpowiedź na pytanie z etapu decyzyjnego.`;
+  const PROMPT = `Jesteś asystentem ucznia pomagającym w nauce poprzez tworzenie ciekawych historii na bazie przekazanych materiałów. Materiały zawierają tekst z podręcznika ${text} oraz kilka zagadnień ${str} które uczeń ma przyswoić. Zbuduj na podstawie tego tekstu historię, dzieląc ją na etapy narracyjne {type: "narration"} oraz elementy interaktywny, które będą polegały na podjęciu decyzji przez ucznia {type: "decision"}. Zwróć tylko etapy do pierwszego etapu typu "decision". Etap typu "decision" powinien pojawić się od razu po fragmencie, który zawiera odpowiedź na pytanie z etapu decyzyjnego. Wymyśl tytuł który opiszę całą historię.`;
 
-  const resp = await generateObject({
+  const { object } = await generateObject({
     model: openai("gpt-4o"),
-    schema: StoryStepSchema,
+    schema: StoryStepsSchema,
     prompt: PROMPT,
   });
 
-  console.log("Generated story steps:", resp.object.storySteps);
-  return resp.object.storySteps;
+  console.log("Generated story steps:", object);
+  return object;
 };

@@ -5,6 +5,7 @@ import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
 import { prisma } from "@/lib/prisma";
+import { GPTStoryStepType } from "@/services/gpt.service";
 
 const elevenlabs = new ElevenLabsClient({
   apiKey: process.env.ELEVENLABS_API_KEY,
@@ -21,12 +22,33 @@ const StoryStepSchema = z.object({
 export type StoryStepType = z.infer<typeof StoryStepSchema>;
 
 // Function to create a new story
-export const createNewStory = async (title: string) => {
+export const createNewStory = async (
+  title: string,
+  steps: GPTStoryStepType[],
+) => {
+  const newSteps = await prisma.step.createMany({
+    data: steps.map(step => {
+      if (step.type === "narration") {
+        return { narrativeStep: step.content };
+      } else {
+        return {
+          decisionStep: {
+            create: {
+              text: step.question,
+              options: step.options,
+            },
+          },
+        };
+      }
+    }),
+  });
+
   const story = await prisma.story.create({
     data: {
       title,
     },
   });
+
   return story;
 };
 

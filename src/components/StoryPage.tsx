@@ -4,6 +4,7 @@
 import React from "react";
 import { Button } from "./ui/Button";
 import { generateStoryStepsAction } from "@/app/_actions/generateStorySteps";
+import { createNewStory } from "@/app/_actions/story.actions";
 
 type Props = {
   extractedText: string;
@@ -18,6 +19,8 @@ export const StoryPage = (props: Props) => {
     );
 
     // add logic to save story to db
+
+    await createNewStory(storySteps.title);
   };
 
   return (
