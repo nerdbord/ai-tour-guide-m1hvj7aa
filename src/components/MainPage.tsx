@@ -8,6 +8,7 @@ import { HiPlus } from "react-icons/hi2";
 import { ListItem } from "./ui/ListItem";
 import { generateTextFromImage } from "@/app/_actions/generateTextFromImage";
 import { StoryPage } from "@/components/StoryPage";
+import { Garnek } from "./ui/Garnek";
 
 interface Material {
   id: number;
@@ -34,14 +35,14 @@ export const MainPage = (props: Props) => {
   };
 
   const handleSelectedMaterials = (newMaterials: ImageFile[]) => {
-    setSelectedMaterials(prevMaterials => {
+    setSelectedMaterials((prevMaterials) => {
       // Create a set of all current and new materials by their IDs
       const materialSet = new Map<string, ImageFile>();
-      prevMaterials.forEach(material =>
-        materialSet.set(material.name, material),
+      prevMaterials.forEach((material) =>
+        materialSet.set(material.name, material)
       );
-      newMaterials.forEach(material =>
-        materialSet.set(material.name, material),
+      newMaterials.forEach((material) =>
+        materialSet.set(material.name, material)
       );
 
       // Convert the map back to an array
@@ -50,14 +51,14 @@ export const MainPage = (props: Props) => {
   };
 
   const handleRemoveMaterial = (name: string) => {
-    setSelectedMaterials(prevMaterials =>
-      prevMaterials.filter(material => material.name !== name),
+    setSelectedMaterials((prevMaterials) =>
+      prevMaterials.filter((material) => material.name !== name)
     );
   };
 
   const handleConvert = async () => {
     const text = await generateTextFromImage(
-      selectedMaterials.map(material => material.image),
+      selectedMaterials.map((material) => material.image)
     );
 
     setExtractedData(text);
@@ -70,7 +71,7 @@ export const MainPage = (props: Props) => {
   return (
     <div className="flex flex-col space-between items-center h-full w-full ">
       <div>
-        <h1 className="text-3xl not-italic font-bold mt-20">
+        <h1 className="text-3xl not-italic font-bold mt-10">
           Czego chcesz się nauczyć?
         </h1>
         <p className="text-lg not-italic font-medium leading-6 py-4">
@@ -90,7 +91,7 @@ export const MainPage = (props: Props) => {
             </div>
           </div>
           <div className="overflow-y-scroll max-h-[300px] h-[200px] scrollbar-hide rounded-lg pt-1">
-            {selectedMaterials.map(material => (
+            {selectedMaterials.map((material) => (
               <ListItem
                 key={material.name}
                 title={material.name}
@@ -105,8 +106,9 @@ export const MainPage = (props: Props) => {
       ) : extractedData ? (
         <StoryPage {...extractedData} />
       ) : (
-        <div className="w-full h-full border border-dashed flex flex-col items-center justify-end gap-3 mt-[74px] pt-7 pb-6 px-12 flex-grow second-bg ">
-          <p className="text-center text-sm not-italic font-semibold leading-4">
+        <div className="w-full h-full border border-dashed flex flex-col items-center justify-end gap-3 mt-[74px] pt-7 pb-6 px-12 flex-grow second-bg">
+          <Garnek />
+          <p className="text-center text-sm not-italic font-semibold leading-4 mt-6">
             Wrzuć zdjęcia lub tekst, <br /> z których chcesz się uczyć
           </p>
           <Button onClick={handleSelectVisible}>Wrzuć zdjęcia</Button>
