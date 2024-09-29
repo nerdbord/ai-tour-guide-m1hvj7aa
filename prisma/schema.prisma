@@ -1,0 +1,35 @@
+// prisma/schema.prisma
+
+datasource db {
+  provider = "postgresql" // or your database provider
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Story {
+  id        String   @id @default(cuid())
+  title     String
+  createdAt DateTime @default(now())
+  steps     Step[]
+}
+
+model Step {
+  id             String   @id @default(cuid())
+  type           StepType
+  content        String
+  audioUrl       String?
+  question       String?
+  options        String[] // Array of options for decisions
+  selectedOption String?
+  story          Story    @relation(fields: [storyId], references: [id])
+  storyId        String
+  order          Int
+}
+
+enum StepType {
+  NARRATION
+  DECISION
+}

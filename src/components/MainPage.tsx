@@ -79,7 +79,7 @@ export const MainPage = (props: Props) => {
       </div>
 
       {selectedMaterials.length > 0 && !extractedData ? (
-        <div className="flex flex-col max-h-full w-full flex-grow mt-4  mb-9 gap-4">
+        <div className="flex flex-col w-full flex-grow mt-4 mb-9 gap-4">
           <div className="flex justify-between items-center">
             Wybrane materiały ({selectedMaterials.length})
             <div
@@ -89,7 +89,7 @@ export const MainPage = (props: Props) => {
               <HiPlus className="text-white" /> <p>Dodaj więcej</p>
             </div>
           </div>
-          <div className="overflow-y-scroll max-h-96 scrollbar-hide">
+          <div className="overflow-y-scroll max-h-[300px] h-[200px] scrollbar-hide rounded-lg pt-1">
             {selectedMaterials.map(material => (
               <ListItem
                 key={material.name}

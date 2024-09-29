@@ -4,6 +4,7 @@ import * as fs from "node:fs";
 import { generateObject } from "ai";
 import { openai } from "@ai-sdk/openai";
 import { z } from "zod";
+import { prisma } from "@/lib/prisma";
 
 const elevenlabs = new ElevenLabsClient({
   apiKey: process.env.ELEVENLABS_API_KEY,
@@ -18,6 +19,16 @@ const StoryStepSchema = z.object({
 });
 
 export type StoryStepType = z.infer<typeof StoryStepSchema>;
+
+// Function to create a new story
+export const createNewStory = async (title: string) => {
+  const story = await prisma.story.create({
+    data: {
+      title,
+    },
+  });
+  return story;
+};
 
 export const generateStoryStepTextSlice = async (params: {
   context: string;
