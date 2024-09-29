@@ -7,20 +7,31 @@ const StoryContextSchema = z.object({
   keyConcepts: z.array(z.string()),
 });
 
-const NarrationSchema = z.object({
-  type: z.literal("narration"),
-  content: z.string(),
-});
+const NarrationSchema = z
+  .object({
+    type: z.literal("NARRATION").describe('Uppercase "NARRATION"'),
+    content: z.string(),
+  })
+  .describe("NARRATION");
 
 const DecisionSchema = z.object({
-  type: z.literal("decision"),
+  type: z.literal("DECISION").describe('Uppercase "DECISION"'),
   question: z.string(),
-  options: z.array(z.string()),
+  options: z
+    .array(z.string())
+    .describe(
+      "Possible actions to be taken by user in the context of the question.",
+    ),
 });
 
-const StoryStepSchema = z.object({
-  storySteps: z.array(z.union([NarrationSchema, DecisionSchema])),
+const StoryStepSchema = z.union([NarrationSchema, DecisionSchema]);
+
+const StoryStepsSchema = z.object({
+  title: z.string(),
+  steps: z.array(z.union([NarrationSchema, DecisionSchema])),
 });
+
+export type GPTStoryStepType = z.infer<typeof StoryStepSchema>;
 
 export const convertImgToText = async (imgUrls: string[]) => {
   const PROMPT =
@@ -34,7 +45,7 @@ export const convertImgToText = async (imgUrls: string[]) => {
         role: "user",
         content: [
           { type: "text", text: PROMPT },
-          ...imgUrls.map(u => ({ type: "image" as const, image: u })),
+          ...imgUrls.map((u) => ({ type: "image" as const, image: u })),
         ],
       },
     ],
@@ -49,14 +60,14 @@ export const generateStorySteps = async (
 ) => {
   const str = keyConcepts.join("");
 
-  const PROMPT = `Jesteś asystentem ucznia pomagającym w nauce poprzez tworzenie ciekawych historii na bazie przekazanych materiałów. Materiały zawierają tekst z podręcznika ${text} oraz kilka zagadnień ${str} które uczeń ma przyswoić. Zbuduj na podstawie tego tekstu historię, dzieląc ją na etapy narracyjne {type: "narration"} oraz elementy interaktywny, które będą polegały na podjęciu decyzji przez ucznia {type: "decision"}. Zwróć tylko etapy do pierwszego etapu typu "decision". Etap typu "decision" powinien pojawić się od razu po fragmencie, który zawiera odpowiedź na pytanie z etapu decyzyjnego.`;
+  const PROMPT = `Jesteś asystentem ucznia pomagającym w nauce poprzez tworzenie ciekawych historii na bazie przekazanych materiałów. Materiały zawierają tekst z podręcznika ${text} oraz kilka zagadnień ${str} które uczeń ma przyswoić. Zbuduj na podstawie tego tekstu historię, dzieląc ją na etapy narracyjne {type: "NARRATION"} oraz elementy interaktywny, które będą polegały na podjęciu decyzji przez ucznia {type: "DECISION"}. Zwróć tylko etapy do pierwszego etapu typu "decision". Etap typu "decision" powinien pojawić się od razu po fragmencie, który zawiera odpowiedź na pytanie z etapu decyzyjnego. Wymyśl tytuł który opiszę całą historię.`;
 
-  const resp = await generateObject({
+  const { object } = await generateObject({
     model: openai("gpt-4o"),
-    schema: StoryStepSchema,
+    schema: StoryStepsSchema,
     prompt: PROMPT,
   });
 
-  console.log("Generated story steps:", resp.object.storySteps);
-  return resp.object.storySteps;
+  console.log("Generated story steps:", object);
+  return object;
 };

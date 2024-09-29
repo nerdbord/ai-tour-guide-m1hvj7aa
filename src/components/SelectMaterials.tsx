@@ -5,54 +5,83 @@ import { Card } from "./ui/Card";
 import Link from "next/link";
 import { SlCamera } from "react-icons/sl";
 
-interface Material {
-  id: number;
-  title: string;
-}
+// interface Material {
+//   id: number;
+//   title: string;
+//   src: string
+// }
 
 interface SelectMaterialsProps {
-  onSelectedMaterialsChange: (materials: Material[]) => void;
+  onSelectedMaterialsChange: (materials: ImageFile[]) => void;
   closeSelectMaterials: () => void;
+}
+
+interface ImageFile {
+  image: string; // Base64 string
+  name: string;  // File name
 }
 
 export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
   onSelectedMaterialsChange,
   closeSelectMaterials,
 }) => {
-  const [selectedMaterials, setSelectedMaterials] = useState<Material[]>([]);
+  const [selectedMaterials, setSelectedMaterials] = useState<ImageFile[]>([]);
+  const [images, setImages] = useState<ImageFile[]>([]);
 
-  const cardsData: Material[] = [
-    { id: 1, title: "Card 1" },
-    { id: 2, title: "Card 2" },
-    { id: 3, title: "Card 3" },
-    { id: 4, title: "Card 4" },
-    { id: 5, title: "Card 5" },
-    { id: 6, title: "Card 6" },
-    { id: 7, title: "Card 7" },
-    { id: 8, title: "Card 8" },
-    { id: 9, title: "Card 9" },
-    { id: 10, title: "Card 10" },
-  ];
+  // const cardsData: Material[] = [
+  //   { id: 1, title: "Card 1" },
+  //   { id: 2, title: "Card 2" },
+  //   { id: 3, title: "Card 3" },
+  //   { id: 4, title: "Card 4" },
+  //   { id: 5, title: "Card 5" },
+  //   { id: 6, title: "Card 6" },
+  //   { id: 7, title: "Card 7" },
+  //   { id: 8, title: "Card 8" },
+  //   { id: 9, title: "Card 9" },
+  //   { id: 10, title: "Card 10" },
+  // ];
 
-  const handleCardClick = (card: Material) => {
-    setSelectedMaterials((prevSelected) => {
-      const isSelected = prevSelected.some((item) => item.id === card.id);
+  const handleCardClick = (card: ImageFile) => {
+    setSelectedMaterials(prevSelected => {
+      const isSelected = prevSelected.some(item => item.name === card.name);
 
       if (isSelected) {
-        return prevSelected.filter((material) => material.id !== card.id);
+        return prevSelected.filter(material => material.name !== card.name);
       } else {
         return [...prevSelected, card];
       }
     });
   };
 
-  useEffect(() => {
-    onSelectedMaterialsChange(selectedMaterials);
-  }, [selectedMaterials, onSelectedMaterialsChange]);
+  // useEffect(() => {
+  //   onSelectedMaterialsChange(selectedMaterials);
+  // }, [selectedMaterials, onSelectedMaterialsChange]);
 
   const handleAddSelected = () => {
     onSelectedMaterialsChange(selectedMaterials);
     closeSelectMaterials();
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files ? Array.from(e.target.files) : [];
+    const imageFiles = files.filter((file) => file.type.startsWith('image/')); // Filtruj tylko obrazy
+    
+    const readFiles = imageFiles.map((file) => {
+      return new Promise<ImageFile>((resolve, reject) => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          if (reader.result) {
+            resolve({ image: reader.result as string, name: file.name }); // Zapisz obraz jako Base64 string i nazwę
+          }
+        };
+        reader.onerror = reject;
+        reader.readAsDataURL(file); // Konwersja na Base64
+      });
+    });
+
+    Promise.all(readFiles).then((imagesData) => {
+      setImages(imagesData); // Zapisz tablicę z obiektami zawierającymi image (Base64 string) i name
+    });
   };
 
   return (
@@ -66,9 +95,19 @@ export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
             Dałeś/aś dostęp aplikacji do <br /> wybranej liczby zdjęć
           </p>
         </div>
-        <Link className="second-bg py-1 px-3 rounded-full" href="/about">
+        <label className="second-bg py-1 px-3 rounded-full cursor-pointer">
           Zarządzaj
-        </Link>
+          <input
+            multiple
+            type="file"
+            accept=".png, .jpg, .jpeg"
+            onChange={handleFileChange}
+            className="hidden"
+          />
+        </label>
+        {/* <Link className="second-bg py-1 px-3 rounded-full" href="/about">
+          Zarządzaj
+        </Link> */}
       </div>
 
       {/* Grid z kartami */}
@@ -79,11 +118,12 @@ export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
         >
           <SlCamera className="h-[60px] w-[60px]" />
         </Link>
-        {cardsData.map((card) => (
+        {images.map((card, idx) => (
           <Card
-            key={card.id}
-            title={card.title}
-            isSelected={selectedMaterials.some((item) => item.id === card.id)}
+            key={idx}
+            // title={card.title}
+            src={card.image}
+            isSelected={selectedMaterials.some(item => item.name === card.name)}
             onClick={() => handleCardClick(card)}
           />
         ))}
