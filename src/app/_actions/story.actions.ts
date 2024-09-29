@@ -13,40 +13,13 @@ import { PassThrough } from "node:stream";
 
 const elevenlabs = new ElevenLabsClient();
 
-const StoryStepSchema = z
-  .object({
-    narrativeSteps: z
-      .array(
-        z
-          .string()
-          .describe(
-            "A narrative step that continues the story, providing descriptive and engaging content.",
-          ),
-      )
-      .describe("An array of two narrative steps."),
-    decisionStep: z
-      .object({
-        text: z
-          .string()
-          .describe(
-            "A question posed to the player that requires a decision based on the story context.",
-          ),
-        options: z
-          .array(
-            z
-              .string()
-              .describe(
-                "A possible choice the player can make in response to the decision question.",
-              ),
-          )
-          .min(2)
-          .describe("An array of at least two decision options."),
-      })
-      .describe("An interactive decision step following the narrative steps."),
-  })
-  .describe(
-    "An object containing two narrative steps and one decision step to continue the story.",
-  );
+const StoryStepSchema = z.object({
+  narrativeStep: z.string(),
+  decisionStep: z.object({
+    text: z.string(),
+    options: z.array(z.string()),
+  }),
+});
 
 export type StoryStepType = z.infer<typeof StoryStepSchema>;
 
@@ -73,7 +46,7 @@ export const createStep = async (
         content: step.question || "",
         options: step.options,
         audioUrl: "",
-        order: step.order || 0,
+        order: 0,
       },
     });
     return createdStep;
@@ -87,7 +60,7 @@ export const createStep = async (
         content: step.content,
         question: step.content,
         audioUrl: "",
-        order: step.order || 0,
+        order: 0,
       },
     });
     return createdStep;
@@ -158,36 +131,23 @@ export const generateStoryStepTextSlice = async (params: {
   text: string;
   previousDecisions: string[];
 }) => {
+  // Updated to return string or null
   try {
     const { object } = await generateObject({
-      model: openai("gpt-4"),
+      model: openai("gpt-4o"),
       schema: StoryStepSchema,
       prompt: `
-        Jesteś asystentem ucznia pomagającym w tworzeniu opowieści edukacyjnych. Na podstawie kontekstu, poprzednich decyzji i wyboru gracza, wygeneruj dwa kolejne etapy narracyjne oraz jeden etap decyzyjny.
-
-        - **Kontekst:** ${params.context}
-        - **Poprzednie decyzje:** ${params.previousDecisions.join(", ")}
-        - **Wybór gracza:** ${params.text}
-
-        **Zadanie:**
-        - Wygeneruj **dwa** etapy narracyjne, które logicznie kontynuują historię.
-        - Następnie wygeneruj **jeden** etap decyzyjny z pytaniem i opcjami wyboru.
-        - Odpowiedź zwróć w następującym formacie JSON:
-
-        {
-          "narrativeSteps": ["Pierwszy etap narracyjny", "Drugi etap narracyjny"],
-          "decisionStep": {
-            "text": "Pytanie dla gracza",
-            "options": ["Opcja 1", "Opcja 2", "Opcja 3"]
-          }
-        }
+        Your goal is to generate the next story step based on the context and previous decisions. 
+        Context: ${params.context}. 
+        Previous decisions: ${params.previousDecisions.join(", ")}. 
+        Text to generate: ${params.text}
       `,
     });
-    console.log("Generated text:", object);
-    return object; // Returns an object conforming to StoryStepType
+    console.log("gen text done", object);
+    return object; // Ensure returning a string
   } catch (error) {
     console.error("Error generating story text:", error);
-    return null;
+    return null; // Return null in case of an error
   }
 };
 
