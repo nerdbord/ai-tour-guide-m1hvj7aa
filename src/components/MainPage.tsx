@@ -7,7 +7,7 @@ import { SelectMaterials } from "./SelectMaterials";
 import { HiPlus } from "react-icons/hi2";
 import { generateTextFromImage } from "@/app/_actions/generateTextFromImage";
 import { StoryPage } from "@/components/StoryPage";
-import { Garnek } from "./ui/Garnek";
+import { Garnek2 } from "./ui/Garnek2";
 
 interface Material {
   id: number;
@@ -57,7 +57,7 @@ export const MainPage = (props: Props) => {
         <StoryPage {...extractedData} />
       ) : (
         <div className="w-full h-full border border-dashed flex flex-col items-center justify-end gap-3 mt-10 pt-7 pb-6 px-12 flex-grow second-bg">
-          <Garnek />
+          <Garnek2 />
           <p className="text-center text-sm not-italic font-semibold leading-4 mt-6">
             Wrzuć zdjęcia lub tekst, <br /> z których chcesz się uczyć
           </p>
