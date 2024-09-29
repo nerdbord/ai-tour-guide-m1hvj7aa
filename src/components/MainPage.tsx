@@ -4,29 +4,23 @@
 import React, { useState } from "react";
 import { Button } from "./ui/Button";
 import { SelectMaterials } from "./SelectMaterials";
-import { HiPlus } from "react-icons/hi2";
 import { generateTextFromImage } from "@/app/_actions/generateTextFromImage";
 import { StoryPage } from "@/components/StoryPage";
 import { Garnek2 } from "./ui/Garnek2";
-
-interface Material {
-  id: number;
-  title: string;
-}
-
-type Props = {};
 
 interface ImageFile {
   image: string; // Base64 string
   name: string; // File name
 }
 
-export const MainPage = (props: Props) => {
+export const MainPage = () => {
   const [selectVisible, setSelectVisible] = useState(false);
   const [extractedData, setExtractedData] = useState<{
     extractedText: string;
     keyConcepts: string[];
   } | null>(null);
+
+  const [showInitialMessage, setShowInitialMessage] = useState(true); // Dodaj stan kontrolujący wyświetlanie początkowego komunikatu
 
   const handleSelectVisible = () => {
     setSelectVisible(!selectVisible);
@@ -40,19 +34,24 @@ export const MainPage = (props: Props) => {
 
     setExtractedData(text);
     setSelectVisible(false);
+    setShowInitialMessage(false); // Ukryj początkowy komunikat po wyborze zdjęć
   };
 
   return (
     <div className="flex flex-col space-between h-full w-full ">
-      <div>
-        <h1 className={`text-3xl not-italic font-bold mt-10`}>
-          Czego chcesz się nauczyć?
-        </h1>
-        <p className="text-lg not-italic font-medium leading-6 py-4">
-          Wrzuć materiał, z którego mam <br /> stworzyć historię:
-        </p>
-      </div>
+      {/* Ekran początkowy wyświetlany tylko raz */}
+      {showInitialMessage && (
+        <div>
+          <h1 className="text-3xl not-italic font-bold mt-10">
+            Czego chcesz się nauczyć?
+          </h1>
+          <p className="text-lg not-italic font-medium leading-6 py-4">
+            Wrzuć materiał, z którego mam <br /> stworzyć historię:
+          </p>
+        </div>
+      )}
 
+      {/* Po wybraniu materiałów wyświetla się historia lub ekran wrzucania zdjęć */}
       {extractedData ? (
         <StoryPage {...extractedData} />
       ) : (
