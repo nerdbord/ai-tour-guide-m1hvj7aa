@@ -1,58 +1,39 @@
 "use client";
 import { useState, useEffect, useRef } from "react";
 import {
+  fetchStoryById,
   generateStoryStepAudioSlice,
   generateStoryStepTextSlice,
 } from "@/app/_actions/story.actions";
-
-// Define the StoryStep types
-type StoryStep = Narration | Decision;
-
-interface Narration {
-  type: "narration";
-  content: string;
-  audioUrl: string; // URL to the audio file for narration
-}
-
-interface Decision {
-  type: "decision";
-  question: string;
-  options: string[];
-  selectedOption?: string;
-}
+import { useParams } from "next/navigation";
+import { Step } from "@prisma/client";
 
 export default function StarWarsNarrative() {
   const [currentStep, setCurrentStep] = useState(0);
   const [isGenerating, setIsGenerating] = useState(false);
-  const [storySteps, setStorySteps] = useState<StoryStep[]>([
-    {
-      type: "narration",
-      content:
-        "Znajdujesz się w starożytnym Rzymie, stojąc pośrodku tętniącego życiem targu pełnego kupców i obywateli.",
-      audioUrl: "../../audio/narration1.mp3",
-    },
-    {
-      type: "narration",
-      content:
-        "Przed sobą widzisz wspaniałe Koloseum, które dominuje nad całym miastem.",
-      audioUrl: "../../audio/narration2.mp3",
-    },
-    {
-      type: "decision",
-      question: "Gdzie chciałbyś pójść najpierw?",
-      options: ["Odwiedź Koloseum", "Przejdź się po Forum Romanum"],
-    },
-  ]);
+  const [storySteps, setStorySteps] = useState<Step[]>([]);
   const [isAudioPlaying, setIsAudioPlaying] = useState(false);
   const [started, setStarted] = useState(false);
   const audioRef = useRef<HTMLAudioElement | null>(null);
 
+  const params = useParams();
+
+  useEffect(() => {
+    fetchStoryById(params.id as string).then((story) => {
+      if (story) {
+        console.log("story.steps", story.steps);
+        setStorySteps(story.steps);
+      }
+    });
+  }, [params.id]);
+
   useEffect(() => {
     if (
       started &&
-      storySteps[currentStep]?.type === "narration" &&
+      storySteps[currentStep]?.type === "NARRATION" &&
       audioRef.current
     ) {
+      // @ts-ignore
       audioRef.current.src = storySteps[currentStep].audioUrl;
       audioRef.current.play().catch((error) => {
         console.log("Audio playback failed:", error);
@@ -79,13 +60,13 @@ export default function StarWarsNarrative() {
     const stepId = `step-${Date.now()}`;
     const storyId = "your-story-id"; // Replace with actual story ID
     const context = storySteps
-      .filter((step): step is Narration => step.type === "narration")
+      .filter((step): step is Step => step.type === "NARRATION")
       .map((step) => step.content)
       .join(" ");
 
     const previousDecisions = storySteps
-      .filter((step): step is Decision => step.type === "decision")
-      .map((decision) => decision.question);
+      .filter((step): step is Step => step.type === "DECISION")
+      .map((decision) => decision.question || "");
 
     try {
       setIsGenerating(true);
@@ -109,21 +90,19 @@ export default function StarWarsNarrative() {
         storyId,
       });
 
-      console.log("audioResponse", audioPath);
-
       if (!audioPath && typeof audioPath !== "string") {
         throw new Error("Failed to generate audio for the story step.");
       }
 
       // Create new narration step with the audio URL
-      const newNarrativeStep: Narration = {
-        type: "narration",
+      const newNarrativeStep = {
+        type: "NARRATION",
         content: nextSteps.narrativeStep,
         audioUrl: audioPath as string,
       };
 
-      const newDecisionStep: Decision = {
-        type: "decision",
+      const newDecisionStep = {
+        type: "DECISION",
         question: nextSteps.decisionStep.text,
         options: nextSteps.decisionStep.options,
       };
@@ -162,14 +141,14 @@ export default function StarWarsNarrative() {
               key={index}
               className={`transition-opacity duration-500 ${
                 index <= currentStep ? "opacity-100" : "opacity-0"
-              } ${step.type === "narration" ? "text-yellow-500" : ""}`}
+              } ${step.type === "NARRATION" ? "text-yellow-500" : ""}`}
             >
-              {step.type === "narration" && (
+              {step.type === "NARRATION" && (
                 <p className="text-3xl font-bold leading-relaxed mb-6">
                   {step.content}
                 </p>
               )}
-              {step.type === "decision" && !isAudioPlaying && (
+              {step.type === "DECISION" && !isAudioPlaying && (
                 <div className="text-center space-y-4">
                   {!isGenerating && (
                     <p className="text-white text-xl mb-4">{step.question}</p>

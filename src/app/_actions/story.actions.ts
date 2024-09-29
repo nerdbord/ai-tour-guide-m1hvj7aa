@@ -21,34 +21,61 @@ const StoryStepSchema = z.object({
 
 export type StoryStepType = z.infer<typeof StoryStepSchema>;
 
+export const fetchStoryById = async (storyId: string) => {
+  return await prisma.story.findUnique({
+    where: {
+      id: storyId,
+    },
+    include: {
+      steps: true,
+    },
+  });
+};
+
 // Function to create a new story
 export const createNewStory = async (
   title: string,
   steps: GPTStoryStepType[],
 ) => {
-  const newSteps = await prisma.step.createMany({
-    data: steps.map(step => {
-      if (step.type === "narration") {
-        return { narrativeStep: step.content };
-      } else {
-        return {
-          decisionStep: {
-            create: {
-              text: step.question,
-              options: step.options,
-            },
-          },
-        };
-      }
-    }),
-  });
-
   const story = await prisma.story.create({
     data: {
       title,
     },
   });
 
+  console.log("story", story);
+
+  // Get the current step count to determine the order
+  let stepOrder = 0;
+
+  for (const step of steps) {
+    if (step.type === "DECISION") {
+      await prisma.step.create({
+        data: {
+          storyId: story.id,
+          type: step.type,
+          content: step.question,
+          options: step.options,
+          audioUrl: "",
+          order: stepOrder++,
+        },
+      });
+      console.log("step", step);
+    }
+
+    if (step.type === "NARRATION") {
+      await prisma.step.create({
+        data: {
+          storyId: story.id,
+          type: step.type,
+          content: step.content,
+          audioUrl: "",
+          order: stepOrder++,
+        },
+      });
+      console.log("step", step);
+    }
+  }
   return story;
 };
 

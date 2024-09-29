@@ -20,7 +20,7 @@ export const StoryPage = (props: Props) => {
 
     // add logic to save story to db
 
-    await createNewStory(storySteps.title);
+    await createNewStory(storySteps.title, storySteps.steps);
   };
 
   return (
