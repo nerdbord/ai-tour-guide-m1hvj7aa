@@ -9,6 +9,7 @@ import {
 } from "@/app/_actions/story.actions";
 import { useParams } from "next/navigation";
 import { Step } from "@prisma/client";
+import { Button } from "@/components/ui/Button";
 
 export default function StarWarsNarrative() {
   const [currentStep, setCurrentStep] = useState(0);
@@ -151,15 +152,10 @@ export default function StarWarsNarrative() {
   };
 
   return (
-    <div className="relative h-screen bg-black overflow-scroll p-6">
+    <div className="main-bg relative h-screen bg-black overflow-y-scroll p-6 scrollbar-hide">
       {!started && (
         <div className="absolute inset-0 flex items-center justify-center">
-          <button
-            className="bg-blue-500 text-white py-2 px-4 rounded hover:bg-blue-600"
-            onClick={() => setStarted(true)}
-          >
-            Start Narrative
-          </button>
+          <Button onClick={() => setStarted(true)}>Rozpocznij opowieść</Button>
         </div>
       )}
 
