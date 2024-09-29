@@ -8,6 +8,7 @@ import { prisma } from "@/lib/prisma";
 import { GPTStoryStepType } from "@/services/gpt.service";
 import { redirect } from "next/navigation";
 import { Step } from "@prisma/client";
+import { put } from "@vercel/blob";
 
 const elevenlabs = new ElevenLabsClient();
 
@@ -175,7 +176,14 @@ export const generateStoryStepAudioSlice = async (params: {
 
     // Return a promise that resolves when the file is fully written
     return new Promise((resolve, reject) => {
-      writeStream.on("finish", () => {
+      writeStream.on("finish", async () => {
+        // Upload the audio buffer to Vercel Blob storage
+        const blobResult = await put(outputPath, audioStream, {
+          access: "public",
+        });
+
+        console.log("Audio uploaded successfully to", blobResult.url);
+
         console.log("Audio saved successfully at", outputPath);
         resolve(outputPath);
       });
