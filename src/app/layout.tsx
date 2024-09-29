@@ -2,7 +2,7 @@ import type { Metadata } from "next";
 import "./globals.css";
 import { Lora, Inter } from "next/font/google"; // Import czcionek
 
-export const lora = Lora({
+const lora = Lora({
   subsets: ["latin"],
   variable: "--font-lora",
   weight: ["400", "500", "600", "700"],

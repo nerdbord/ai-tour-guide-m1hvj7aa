@@ -34,14 +34,17 @@ export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
     });
   };
 
-  const handleAddSelected = () => {
+  const handleAddSelected = async () => {
     setIsProcessing(true); // Rozpocznij przetwarzanie
     setHasSeenInitialScreen(true); // Ustaw, że użytkownik zobaczył ekran początkowy
-    setTimeout(() => {
-      onSelectedMaterialsChange(selectedMaterials);
+
+    try {
+      // Czekaj na wywołanie funkcji przetwarzania
+      await onSelectedMaterialsChange(selectedMaterials);
+    } finally {
+      setIsProcessing(false); // Zakończ przetwarzanie po zakończeniu operacji
       closeSelectMaterials();
-      setIsProcessing(false); // Symulacja zakończenia przetwarzania
-    }, 2000); // Symulacja procesu trwającego 2 sekundy
+    }
   };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -69,7 +72,7 @@ export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
   // Jeśli trwa przetwarzanie, pokaż komunikat o analizowaniu
   if (isProcessing) {
     return (
-      <div className="flex items-center justify-center pt-4">
+      <div className="flex items-center justify-center pt-4 absolute bottom-0 top-0 left-0 right-0 main-bg ">
         <p className="text-sm not-italic font-medium text-gray-500">
           Analizuję przesłane zdjęcia...
         </p>
