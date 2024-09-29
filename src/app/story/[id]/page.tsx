@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/ban-ts-comment */
 "use client";
 import { useState, useEffect, useRef } from "react";
 import {
@@ -19,7 +20,7 @@ export default function StarWarsNarrative() {
   const params = useParams();
 
   useEffect(() => {
-    fetchStoryById(params.id as string).then((story) => {
+    fetchStoryById(params.id as string).then(story => {
       if (story) {
         console.log("story.steps", story.steps);
         setStorySteps(story.steps);
@@ -33,9 +34,9 @@ export default function StarWarsNarrative() {
       storySteps[currentStep]?.type === "NARRATION" &&
       audioRef.current
     ) {
-      // @ts-ignore
+      // @ts-expect-error
       audioRef.current.src = storySteps[currentStep].audioUrl;
-      audioRef.current.play().catch((error) => {
+      audioRef.current.play().catch(error => {
         console.log("Audio playback failed:", error);
       });
       setIsAudioPlaying(true);
@@ -52,7 +53,7 @@ export default function StarWarsNarrative() {
     }
 
     if (currentStep < storySteps.length - 1) {
-      setCurrentStep((prev) => prev + 1);
+      setCurrentStep(prev => prev + 1);
     }
   };
 
@@ -61,12 +62,12 @@ export default function StarWarsNarrative() {
     const storyId = "your-story-id"; // Replace with actual story ID
     const context = storySteps
       .filter((step): step is Step => step.type === "NARRATION")
-      .map((step) => step.content)
+      .map(step => step.content)
       .join(" ");
 
     const previousDecisions = storySteps
       .filter((step): step is Step => step.type === "DECISION")
-      .map((decision) => decision.question || "");
+      .map(decision => decision.question || "");
 
     try {
       setIsGenerating(true);
@@ -108,12 +109,12 @@ export default function StarWarsNarrative() {
       };
 
       // Update the story steps
-      setStorySteps((prevSteps) => [
+      setStorySteps(prevSteps => [
         ...prevSteps,
         newNarrativeStep,
         newDecisionStep,
       ]);
-      setCurrentStep((prev) => prev + 1);
+      setCurrentStep(prev => prev + 1);
     } catch (error) {
       console.error("Error generating next story step:", error);
     } finally {
