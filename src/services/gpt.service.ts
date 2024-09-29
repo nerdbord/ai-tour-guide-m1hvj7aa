@@ -7,16 +7,20 @@ const StoryContextSchema = z.object({
   keyConcepts: z.array(z.string()),
 });
 
-const NarrationSchema = z.object({
-  type: z.literal("narration"),
-  content: z.string(),
-});
+const NarrationSchema = z
+  .object({
+    type: z.literal("narration"),
+    content: z.string(),
+  })
+  .describe("Narration");
 
-const DecisionSchema = z.object({
-  type: z.literal("decision"),
-  question: z.string(),
-  options: z.array(z.string()),
-});
+const DecisionSchema = z
+  .object({
+    type: z.literal("decision"),
+    question: z.string(),
+    options: z.array(z.string()),
+  })
+  .describe("Decision");
 
 const StoryStepSchema = z.object({
   storySteps: z.array(z.union([NarrationSchema, DecisionSchema])),

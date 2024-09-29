@@ -3,16 +3,27 @@
 "use client";
 import React from "react";
 import { Button } from "./ui/Button";
+import { generateStoryStepsAction } from "@/app/_actions/generateStorySteps";
 
-type Props = {};
+type Props = {
+  extractedText: string;
+  keyConcepts: string[];
+};
 
 export const StoryPage = (props: Props) => {
+  const handleCreateStory = async () => {
+    const storySteps = await generateStoryStepsAction(
+      props.extractedText,
+      props.keyConcepts,
+    );
+
+    // add logic to save story to db
+  };
+
   return (
     <div className="flex flex-col justify-between items-center w-full h-full px-4">
       <div>
-        <h1 className="text-3xl not-italic font-bold mt-20">
-          Kluczowe zagadnienia
-        </h1>
+        <h1 className="text-3xl not-italic font-bold">Kluczowe zagadnienia</h1>
         <p className="text-lg not-italic font-medium leading-6 py-4">
           Z załadowanego materiału stworzyliśmy dla ciebie treści łatwe do nauki
         </p>
@@ -26,12 +37,14 @@ export const StoryPage = (props: Props) => {
       </div>
 
       {/* Sekcja "srodek" zajmująca maksymalnie dużo miejsca */}
-      <div className="flex-grow flex items-center justify-center w-full">
-        <p className="text-center">TUTAJ WYGENEROWANY TYTUL I PODROZDZIAŁY</p>
+      <div className="flex-grow flex flex-col justify-center w-full gap-2">
+        {props.keyConcepts.map((concept, idx) => (
+          <p key={idx}>{concept}</p>
+        ))}
       </div>
 
       <div className="mb-4">
-        <Button>Stwórz historie</Button>
+        <Button onClick={handleCreateStory}>Stwórz historie</Button>
       </div>
     </div>
   );

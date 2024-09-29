@@ -25,14 +25,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en" className="h-full">
+    <html lang="en">
       <body
-        className={` ${lora.className} flex justify-center items-start h-full overflow-hidden `}
+        className={` ${lora.className} flex justify-center items-start min-h-full`}
       >
         <div
           className="flex flex-col justify-between 
-             h-full w-full 
-             md:h-[652px] md:w-[393px] md:max-h-[100vh] lg:mx-auto relative main-bg"
+             h-full w-full md:w-[393px] lg:mx-auto relative main-bg"
         >
           {children}
         </div>
