@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Button } from "./ui/Button";
 import { Card } from "./ui/Card";
 
@@ -21,6 +21,15 @@ export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
   const [images, setImages] = useState<ImageFile[]>([]);
   const [isProcessing, setIsProcessing] = useState(false); // Stan dla przetwarzania zdjęć
   const [hasSeenInitialScreen, setHasSeenInitialScreen] = useState(false); // Stan kontrolujący wyświetlanie ekranu początkowego
+  const [dots, setDots] = useState("");
+
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setDots((prevDots) => (prevDots.length < 3 ? prevDots + "." : "")); // Animacja kropek
+    }, 500);
+
+    return () => clearInterval(interval); // Czyszczenie interwału po demontażu komponentu
+  }, []);
 
   const handleCardClick = (card: ImageFile) => {
     setSelectedMaterials((prevSelected) => {
@@ -72,9 +81,15 @@ export const SelectMaterials: React.FC<SelectMaterialsProps> = ({
   // Jeśli trwa przetwarzanie, pokaż komunikat o analizowaniu
   if (isProcessing) {
     return (
-      <div className="flex items-center justify-center pt-4 absolute bottom-0 top-0 left-0 right-0 main-bg ">
-        <p className="text-sm not-italic font-medium text-gray-500">
-          Analizuję przesłane zdjęcia...
+      <div className="flex items-center justify-center pt-4 absolute bottom-0 top-0 left-0 right-0 main-bg">
+        <p className="text-sm not-italic font-medium ">
+          Analizuję przesłane zdjęcia
+          {/* Animacja kropek */}
+          <span
+            style={{ display: "inline-block", width: "1em", textAlign: "left" }}
+          >
+            {dots}
+          </span>
         </p>
       </div>
     );
