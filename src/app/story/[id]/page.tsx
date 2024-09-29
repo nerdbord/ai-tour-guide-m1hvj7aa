@@ -124,7 +124,7 @@ export default function StarWarsNarrative() {
       const newDecisionStep: Step = {
         id: stepId,
         type: "DECISION",
-        content: "",
+        content: decisionStep.text,
         audioUrl: null,
         question: decisionStep.text,
         options: decisionStep.options,
