@@ -60,7 +60,11 @@ export const generateStorySteps = async (
 ) => {
   const str = keyConcepts.join("");
 
-  const PROMPT = `Jesteś asystentem ucznia pomagającym w nauce poprzez tworzenie ciekawych historii na bazie przekazanych materiałów. Materiały zawierają tekst z podręcznika ${text} oraz kilka zagadnień ${str} które uczeń ma przyswoić. Zbuduj na podstawie tego tekstu historię, dzieląc ją na etapy narracyjne {type: "NARRATION"} oraz elementy interaktywny, które będą polegały na podjęciu decyzji przez ucznia {type: "DECISION"}. Zwróć tylko etapy do pierwszego etapu typu "decision". Etap typu "decision" powinien pojawić się od razu po fragmencie, który zawiera odpowiedź na pytanie z etapu decyzyjnego. Wymyśl tytuł który opiszę całą historię.`;
+  const PROMPT = `Jesteś asystentem ucznia pomagającym w nauce poprzez tworzenie ciekawych historii na bazie przekazanych materiałów. 
+  Materiały zawierają tekst z podręcznika ${text} oraz kilka zagadnień ${str} które uczeń ma przyswoić w klimacie role playing gdzie uczestniczy w wydarzeniach z historii wcielając się w postać historyczną. 
+  Zbuduj na podstawie tego tekstu historię, dzieląc ją na etapy narracyjne {type: "NARRATION"} oraz elementy interaktywny, które będą polegały na podjęciu decyzji przez ucznia {type: "DECISION"}. 
+  Zwróć tylko etapy do pierwszego etapu typu "decision". Etap typu "decision" powinien pojawić się od razu po fragmencie, który zawiera odpowiedź na pytanie z etapu decyzyjnego. 
+  Wymyśl tytuł który opiszę całą historię.`;
 
   const { object } = await generateObject({
     model: openai("gpt-4o"),
