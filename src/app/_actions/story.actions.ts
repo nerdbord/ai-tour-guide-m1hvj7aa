@@ -9,9 +9,7 @@ import { GPTStoryStepType } from "@/services/gpt.service";
 import { redirect } from "next/navigation";
 import { Step } from "@prisma/client";
 
-const elevenlabs = new ElevenLabsClient({
-  apiKey: "sk_14cfa6acd961167f2d1db04be41166a1e89f6fcc1ea9d5fd",
-});
+const elevenlabs = new ElevenLabsClient();
 
 const StoryStepSchema = z.object({
   narrativeStep: z.string(),
