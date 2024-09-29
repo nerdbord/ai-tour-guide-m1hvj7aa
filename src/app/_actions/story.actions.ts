@@ -75,49 +75,55 @@ export const createNewStory = async (
     },
   });
 
-  // Get the current step count to determine the order
-  let stepOrder = 0;
+  try {
+    // Get the current step count to determine the order
+    let stepOrder = 0;
 
-  for (const step of steps) {
-    if (step.type === "DECISION") {
-      await prisma.step.create({
-        data: {
+    for (const step of steps) {
+      if (step.type === "DECISION") {
+        await prisma.step.create({
+          data: {
+            storyId: story.id,
+            type: step.type,
+            content: step.question,
+            options: step.options,
+            audioUrl: "",
+            order: stepOrder++,
+          },
+        });
+      }
+
+      if (step.type === "NARRATION") {
+        const createdStep = await prisma.step.create({
+          data: {
+            storyId: story.id,
+            type: step.type,
+            content: step.content,
+            question: step.content,
+            audioUrl: "",
+            order: stepOrder++,
+          },
+        });
+        const generatedAudio = await generateStoryStepAudioSlice({
+          text: step.content,
           storyId: story.id,
-          type: step.type,
-          content: step.question,
-          options: step.options,
-          audioUrl: "",
-          order: stepOrder++,
-        },
-      });
-    }
+          stepId: createdStep.id,
+        });
 
-    if (step.type === "NARRATION") {
-      const createdStep = await prisma.step.create({
-        data: {
-          storyId: story.id,
-          type: step.type,
-          content: step.content,
-          question: step.content,
-          audioUrl: "",
-          order: stepOrder++,
-        },
-      });
-      const generatedAudio = await generateStoryStepAudioSlice({
-        text: step.content,
-        storyId: story.id,
-        stepId: createdStep.id,
-      });
-
-      await prisma.step.update({
-        where: {
-          id: createdStep.id,
-        },
-        data: {
-          audioUrl: generatedAudio as string,
-        },
-      });
+        await prisma.step.update({
+          where: {
+            id: createdStep.id,
+          },
+          data: {
+            audioUrl: generatedAudio as string,
+          },
+        });
+      }
     }
+  } catch (err) {
+    return {
+      message: JSON.stringify(err),
+    };
   }
 
   redirect(`/story/${story.id}`);
