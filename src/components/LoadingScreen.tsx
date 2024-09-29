@@ -11,10 +11,10 @@ export const LoadingScreen = (props: Props) => {
 
   useEffect(() => {
     const interval = setInterval(() => {
-      setDots((prevDots) => (prevDots.length < 3 ? prevDots + "." : ""));
+      setDots((prevDots) => (prevDots.length < 3 ? prevDots + "." : "")); // Animacja kropek
     }, 500);
 
-    return () => clearInterval(interval);
+    return () => clearInterval(interval); // Czyszczenie interwału po demontażu komponentu
   }, []);
 
   return (
@@ -28,7 +28,10 @@ export const LoadingScreen = (props: Props) => {
 
       <div className="flex-grow flex flex-col items-center justify-center w-full">
         <Garnek />
-        <p className="text-center mt-4">Gotujemy dla ciebie opowieść{dots}</p>
+        {/* Napis nieruchomy, a kropki się zmieniają */}
+        <p className="text-center mt-4">
+          Gotujemy dla ciebie opowieść<span>{dots}</span>
+        </p>
       </div>
     </div>
   );
