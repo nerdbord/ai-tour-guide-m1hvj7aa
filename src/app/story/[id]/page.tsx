@@ -79,44 +79,69 @@ export default function StarWarsNarrative() {
 
     const previousDecisions = storySteps
       .filter((step): step is Step => step.type === "DECISION")
-      .map((decision) => decision.question || "");
+      .map((decision) => decision.content || "");
 
     try {
       setIsGenerating(true);
 
-      // Generate text for the next step based on context and decision
+      // Generate text for the next steps based on context and decision
       const nextSteps = await generateStoryStepTextSlice({
         context,
         text: option,
         previousDecisions,
       });
 
-      const narrativeStep = await createStep(storyId, {
-        type: "NARRATION",
-        question: null,
-        options: [],
-        selectedOption: null,
-        story: {
-          connect: {
-            id: storyId,
-          },
-        },
-        order: storySteps.length,
-        content: nextSteps?.narrativeStep || "",
-      });
-
-      if (!narrativeStep) {
-        throw new Error("Failed to generate text for the story step.");
+      if (!nextSteps) {
+        throw new Error("Failed to generate text for the story steps.");
       }
 
+      // Process the generated narrative steps
+      const newSteps: Step[] = [];
+      for (const narrativeText of nextSteps.narrativeSteps) {
+        const narrativeStep = await createStep(storyId, {
+          type: "NARRATION",
+          question: null,
+          options: [],
+          selectedOption: null,
+          story: {
+            connect: {
+              id: storyId,
+            },
+          },
+          order: storySteps.length + newSteps.length,
+          content: narrativeText,
+        });
+
+        if (!narrativeStep) {
+          throw new Error("Failed to generate text for the story step.");
+        }
+
+        const audioPath = await generateStoryStepAudioSlice({
+          text: narrativeStep.content,
+          stepId: narrativeStep.id,
+          storyId,
+        });
+
+        if (!audioPath && typeof audioPath !== "string") {
+          throw new Error("Failed to generate audio for the story step.");
+        }
+
+        const updatedNarrativeStep = await updateStep(narrativeStep.id, {
+          audioUrl: audioPath as string,
+        });
+
+        newSteps.push(updatedNarrativeStep);
+      }
+
+      // Process the generated decision step
       const decisionStep = await createStep(storyId, {
         type: "DECISION",
-        content: nextSteps?.decisionStep.text || "",
+        content: nextSteps.decisionStep.text || "",
         audioUrl: null,
-        question: nextSteps?.decisionStep.text || "",
-        options: nextSteps?.decisionStep.options,
+        question: nextSteps.decisionStep.text || "",
+        options: nextSteps.decisionStep.options,
         selectedOption: null,
-        order: storySteps.length + 1,
+        order: storySteps.length + newSteps.length,
         story: {
           connect: {
             id: storyId,
@@ -125,36 +150,14 @@ export default function StarWarsNarrative() {
       });
 
       if (!decisionStep) {
-        throw new Error("Failed to generate text for the story step.");
+        throw new Error("Failed to generate text for the decision step.");
       }
-
-      if (!nextSteps) {
-        throw new Error("Failed to generate text for the story step.");
-      }
-
-      const audioPath = await generateStoryStepAudioSlice({
-        text: narrativeStep.content,
-        stepId: narrativeStep.id,
-        storyId,
-      });
-
-      if (!audioPath && typeof audioPath !== "string") {
-        throw new Error("Failed to generate audio for the story step.");
-      }
-
-      const updatedNarrativeStep = await updateStep(narrativeStep.id, {
-        audioUrl: audioPath as string,
-      });
 
       // Update the story steps
-      setStorySteps((prevSteps) => [
-        ...prevSteps,
-        updatedNarrativeStep,
-        decisionStep,
-      ]);
+      setStorySteps((prevSteps) => [...prevSteps, ...newSteps, decisionStep]);
       setCurrentStep((prev) => prev + 1);
     } catch (error) {
-      console.error("Error generating next story step:", error);
+      console.error("Error generating next story steps:", error);
     } finally {
       setIsGenerating(false);
     }
@@ -188,7 +191,7 @@ export default function StarWarsNarrative() {
                   {isGenerating ? (
                     // Loading Indicator
                     <div className="flex justify-center items-center">
-                      <div className="loader">Generating...</div>
+                      <div className="loader">Generowanie...</div>
                     </div>
                   ) : (
                     // Decision Options

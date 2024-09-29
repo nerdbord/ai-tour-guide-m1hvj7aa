@@ -26,11 +26,6 @@ const DecisionSchema = z.object({
 
 const StoryStepSchema = z.union([NarrationSchema, DecisionSchema]);
 
-const StoryStepsSchema = z.object({
-  title: z.string(),
-  steps: z.array(z.union([NarrationSchema, DecisionSchema])),
-});
-
 export type GPTStoryStepType = z.infer<typeof StoryStepSchema>;
 
 export const convertImgToText = async (imgUrls: string[]) => {
@@ -54,24 +49,30 @@ export const convertImgToText = async (imgUrls: string[]) => {
   return resp.object;
 };
 
+const StoryStepsSchema = z.object({
+  title: z.string(),
+  steps: z.array(z.union([NarrationSchema, DecisionSchema])),
+});
+
+// Function to generate story steps
 export const generateStorySteps = async (
   text: string,
   keyConcepts: string[],
 ) => {
-  const str = keyConcepts.join("");
+  const str = keyConcepts.join(", ");
 
-  const PROMPT = `Jesteś asystentem ucznia pomagającym w nauce poprzez tworzenie ciekawych historii na bazie przekazanych materiałów. 
-  Materiały zawierają tekst z podręcznika ${text} oraz kilka zagadnień ${str} które uczeń ma przyswoić w klimacie role playing gdzie uczestniczy w wydarzeniach z historii wcielając się w postać historyczną. 
-  Zbuduj na podstawie tego tekstu historię, dzieląc ją na etapy narracyjne {type: "NARRATION"} oraz elementy interaktywny, które będą polegały na podjęciu decyzji przez ucznia {type: "DECISION"}. 
-  Zwróć tylko etapy do pierwszego etapu typu "decision". Etap typu "decision" powinien pojawić się od razu po fragmencie, który zawiera odpowiedź na pytanie z etapu decyzyjnego. 
-  Wymyśl tytuł który opiszę całą historię.`;
+  const PROMPT = `Jesteś asystentem ucznia pomagającym w nauce poprzez tworzenie ciekawych historii na bazie przekazanych materiałów.
+Materiały zawierają tekst z podręcznika: "${text}" oraz kilka zagadnień: "${str}", które uczeń ma przyswoić w klimacie role-playing, gdzie uczestniczy w wydarzeniach z historii, wcielając się w postać historyczną.
+Zbuduj na podstawie tego tekstu historię, dzieląc ją na etapy narracyjne {type: "NARRATION"} oraz elementy interaktywne, które będą polegały na podjęciu decyzji przez ucznia {type: "DECISION"}.
+Uwzględnij wszystkie etapy aż do i łącznie z pierwszym etapem typu "DECISION". Etap typu "DECISION" powinien pojawić się od razu po fragmencie, który zawiera odpowiedź na pytanie z etapu decyzyjnego.
+Wymyśl tytuł, który opisze całą historię.
+Proszę, aby cała odpowiedź była w języku polskim.`;
 
   const { object } = await generateObject({
-    model: openai("gpt-4o"),
+    model: openai("gpt-4"),
     schema: StoryStepsSchema,
     prompt: PROMPT,
   });
 
-  console.log("Generated story steps:", object);
   return object;
 };

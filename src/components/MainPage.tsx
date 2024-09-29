@@ -20,29 +20,43 @@ export const MainPage = () => {
     keyConcepts: string[];
   } | null>(null);
 
-  const [showInitialMessage, setShowInitialMessage] = useState(true); // Dodaj stan kontrolujący wyświetlanie początkowego komunikatu
+  const [showInitialMessage, setShowInitialMessage] = useState(true);
+  const [isLoading, setIsLoading] = useState(false); // Added loading state
+  const [error, setError] = useState<string | null>(null); // Added error state
 
   const handleSelectVisible = () => {
     setSelectVisible(!selectVisible);
   };
 
   const handleSelectedMaterials = async (newMaterials: ImageFile[]) => {
-    // Od razu po wybraniu zdjęć wywołujemy generowanie historii
-    const text = await generateTextFromImage(
-      newMaterials.map((material) => material.image)
-    );
+    try {
+      setIsLoading(true);
+      setError(null); // Reset error state
 
-    setExtractedData(text);
-    setSelectVisible(false);
-    setShowInitialMessage(false); // Ukryj początkowy komunikat po wyborze zdjęć
+      // Optional: Resize or compress images here if necessary
+      // Example: const resizedImages = await resizeImages(newMaterials);
+
+      const text = await generateTextFromImage(
+        newMaterials.map((material) => material.image),
+      );
+
+      setExtractedData(text);
+      setSelectVisible(false);
+      setShowInitialMessage(false);
+    } catch (err) {
+      console.error("Error generating text from image:", err);
+      setError("Nie udało się przetworzyć obrazu. Proszę spróbować ponownie.");
+    } finally {
+      setIsLoading(false);
+    }
   };
 
   return (
     <div className="flex flex-col space-between h-full w-full ">
-      {/* Ekran początkowy wyświetlany tylko raz */}
+      {/* Initial Screen Displayed Only Once */}
       {showInitialMessage && (
         <div>
-          <h1 className="text-3xl not-italic font-bold mt-10">
+          <h1 className="text-3xl font-bold mt-10">
             Czego chcesz się nauczyć?
           </h1>
           <p className="text-lg not-italic font-medium leading-6 py-4">
@@ -51,7 +65,17 @@ export const MainPage = () => {
         </div>
       )}
 
-      {/* Po wybraniu materiałów wyświetla się historia lub ekran wrzucania zdjęć */}
+      {/* Display error message if any */}
+      {error && <div className="text-red-500 text-center mb-4">{error}</div>}
+
+      {/* Loading Indicator */}
+      {isLoading && (
+        <div className="text-center mb-4">
+          <p>Przetwarzanie obrazu...</p>
+        </div>
+      )}
+
+      {/* Display StoryPage or Upload Interface */}
       {extractedData ? (
         <StoryPage {...extractedData} />
       ) : (
@@ -64,6 +88,7 @@ export const MainPage = () => {
         </div>
       )}
 
+      {/* SelectMaterials Modal */}
       {selectVisible && (
         <SelectMaterials
           onSelectedMaterialsChange={handleSelectedMaterials}
